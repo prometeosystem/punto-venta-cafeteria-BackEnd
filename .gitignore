@@ -1,0 +1,44 @@
+# Entorno virtual
+venv/
+env/
+ENV/
+.venv
+
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+
+# IDEs
+.idea/
+.vscode/
+*.swp
+*.swo
+*~
+
+# Base de datos
+*.db
+*.sqlite
+*.sqlite3
+
+# Variables de entorno
+.env
+.env.local
+
+# Logs
+*.log
+
+# Distribución / empaquetado
+dist/
+build/
+*.egg-info/
+
+# macOS
+.DS_Store
+
+# Archivos temporales
+*.tmp
+*.bak
+
