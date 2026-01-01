@@ -7,6 +7,7 @@ CREATE TABLE IF NOT EXISTS usuarios (
     apellido_paterno VARCHAR(100) NOT NULL,
     apellido_materno VARCHAR(100),
     correo VARCHAR(255) UNIQUE NOT NULL,
+    user VARCHAR(100) UNIQUE NOT NULL,
     contrasena VARCHAR(255) NOT NULL,
     celular VARCHAR(20),
     rol ENUM('vendedor', 'cocina', 'administrador', 'superadministrador') NOT NULL,
@@ -27,8 +28,11 @@ CREATE TABLE IF NOT EXISTS clientes (
     rfc VARCHAR(20),
     direccion TEXT,
     puntos DECIMAL(10, 2) DEFAULT 0.00,
+    loyabit_id VARCHAR(255) NULL, -- ID del cliente en Loyabit
+    loyabit_sincronizado BOOLEAN DEFAULT FALSE, -- Indica si está sincronizado con Loyabit
     fecha_creacion TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    fecha_actualizacion TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
+    fecha_actualizacion TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    INDEX idx_loyabit_id (loyabit_id)
 );
 
 -- Tabla de productos
@@ -38,6 +42,7 @@ CREATE TABLE IF NOT EXISTS productos (
     descripcion TEXT,
     precio DECIMAL(10, 2) NOT NULL,
     categoria VARCHAR(100),
+    tiempo_preparacion INT, -- Tiempo en minutos
     activo BOOLEAN DEFAULT TRUE,
     fecha_creacion TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     fecha_actualizacion TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
@@ -47,14 +52,16 @@ CREATE TABLE IF NOT EXISTS productos (
 CREATE TABLE IF NOT EXISTS insumos (
     id_insumo INT AUTO_INCREMENT PRIMARY KEY,
     nombre VARCHAR(255) NOT NULL,
+    nombre_normalizado VARCHAR(255) NOT NULL, -- Nombre sin acentos, en minúsculas para evitar duplicados
     descripcion TEXT,
-    unidad_medida VARCHAR(50) NOT NULL, -- kg, litros, unidades, etc.
+    unidad_medida VARCHAR(50) NOT NULL, -- kg, litros, unidades, gramos, onzas, etc.
     cantidad_actual DECIMAL(10, 3) NOT NULL DEFAULT 0,
     cantidad_minima DECIMAL(10, 3) NOT NULL DEFAULT 0,
     precio_compra DECIMAL(10, 2),
     activo BOOLEAN DEFAULT TRUE,
     fecha_creacion TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    fecha_actualizacion TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
+    fecha_actualizacion TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    UNIQUE KEY unique_nombre_normalizado (nombre_normalizado)
 );
 
 -- Tabla de movimientos de inventario

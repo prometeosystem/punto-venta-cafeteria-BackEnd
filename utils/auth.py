@@ -46,9 +46,22 @@ def get_usuario_by_correo(correo: str):
     conexion.close()
     return usuario
 
-def authenticate_user(correo: str, password: str):
-    """Autentica un usuario"""
-    usuario = get_usuario_by_correo(correo)
+def get_usuario_by_correo_o_user(correo_o_user: str):
+    """Obtiene un usuario por su correo o user"""
+    conexion = conectar()
+    if not conexion:
+        return None
+    cursor = conexion.cursor(dictionary=True)
+    sql = "SELECT * FROM usuarios WHERE correo = %s OR user = %s"
+    cursor.execute(sql, (correo_o_user, correo_o_user))
+    usuario = cursor.fetchone()
+    cursor.close()
+    conexion.close()
+    return usuario
+
+def authenticate_user(correo_o_user: str, password: str):
+    """Autentica un usuario por correo o user"""
+    usuario = get_usuario_by_correo_o_user(correo_o_user)
     if not usuario:
         return False
     if not verify_password(password, usuario["contrasena"]):
@@ -64,12 +77,12 @@ async def get_current_user(token: str = Depends(oauth2_scheme)):
     )
     try:
         payload = jwt.decode(token, SECRET_KEY, algorithms=[ALGORITHM])
-        correo: str = payload.get("sub")
-        if correo is None:
+        correo_o_user: str = payload.get("sub")
+        if correo_o_user is None:
             raise credentials_exception
     except JWTError:
         raise credentials_exception
-    usuario = get_usuario_by_correo(correo)
+    usuario = get_usuario_by_correo_o_user(correo_o_user)
     if usuario is None:
         raise credentials_exception
     return usuario

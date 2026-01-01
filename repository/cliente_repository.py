@@ -24,14 +24,15 @@ def crear_cliente(cliente):
     sql = """
     INSERT INTO clientes(
         nombre, apellido_paterno, apellido_materno, correo, contrasena, 
-        celular, rfc, direccion, puntos
+        celular, rfc, direccion, puntos, loyabit_id, loyabit_sincronizado
     )
-    VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s)
+    VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)
     """
     datos = (
         cliente.nombre, cliente.apellido_paterno, cliente.apellido_materno,
         cliente.correo, contrasena_hash, cliente.celular,
-        cliente.rfc, cliente.direccion, cliente.puntos
+        cliente.rfc, cliente.direccion, cliente.puntos,
+        None, False  # loyabit_id y loyabit_sincronizado inicialmente vacíos
     )
     
     try:
@@ -53,7 +54,7 @@ def ver_todos_clientes():
         return {"error": "Error de conexión a la base de datos"}
     
     cursor = conexion.cursor(dictionary=True)
-    sql = "SELECT id_cliente, nombre, apellido_paterno, apellido_materno, correo, celular, rfc, direccion, puntos FROM clientes"
+    sql = "SELECT id_cliente, nombre, apellido_paterno, apellido_materno, correo, celular, rfc, direccion, puntos, loyabit_id, loyabit_sincronizado FROM clientes"
     cursor.execute(sql)
     resultados = cursor.fetchall()
     cursor.close()
@@ -66,7 +67,7 @@ def ver_cliente_by_id(id_cliente: int):
         return {"error": "Error de conexión a la base de datos"}
     
     cursor = conexion.cursor(dictionary=True)
-    sql = "SELECT id_cliente, nombre, apellido_paterno, apellido_materno, correo, celular, rfc, direccion, puntos FROM clientes WHERE id_cliente = %s"
+    sql = "SELECT id_cliente, nombre, apellido_paterno, apellido_materno, correo, celular, rfc, direccion, puntos, loyabit_id, loyabit_sincronizado FROM clientes WHERE id_cliente = %s"
     cursor.execute(sql, (id_cliente,))
     cliente = cursor.fetchone()
     cursor.close()
@@ -200,3 +201,39 @@ def contar_visitas_cliente(id_cliente: int):
     cursor.close()
     conexion.close()
     return {"total_visitas": resultado[0] if resultado else 0}
+
+def actualizar_loyabit_id(id_cliente: int, loyabit_id: str, sincronizado: bool = True):
+    """Actualiza el loyabit_id y el estado de sincronización de un cliente"""
+    conexion = conectar()
+    if not conexion:
+        return {"error": "Error de conexión a la base de datos"}
+    
+    cursor = conexion.cursor()
+    sql = "UPDATE clientes SET loyabit_id = %s, loyabit_sincronizado = %s WHERE id_cliente = %s"
+    
+    try:
+        cursor.execute(sql, (loyabit_id, sincronizado, id_cliente))
+        conexion.commit()
+        cursor.close()
+        conexion.close()
+        return {"message": "ID de Loyabit actualizado correctamente"}
+    except Exception as e:
+        conexion.rollback()
+        cursor.close()
+        conexion.close()
+        return {"error": f"Error al actualizar ID de Loyabit: {str(e)}"}
+
+def obtener_cliente_por_loyabit_id(loyabit_id: str):
+    """Obtiene un cliente por su ID de Loyabit"""
+    conexion = conectar()
+    if not conexion:
+        return {"error": "Error de conexión a la base de datos"}
+    
+    cursor = conexion.cursor(dictionary=True)
+    sql = "SELECT * FROM clientes WHERE loyabit_id = %s"
+    cursor.execute(sql, (loyabit_id,))
+    cliente = cursor.fetchone()
+    cursor.close()
+    conexion.close()
+    
+    return cliente

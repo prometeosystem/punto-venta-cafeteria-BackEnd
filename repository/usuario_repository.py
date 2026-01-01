@@ -17,19 +17,27 @@ def crear_usuario(usuario: UsuarioCreate):
         conexion.close()
         return {"error": "El correo ya está registrado"}
     
+    # Verificar si el user ya existe
+    sql_check_user = "SELECT id_usuario FROM usuarios WHERE user = %s"
+    cursor.execute(sql_check_user, (usuario.user,))
+    if cursor.fetchone():
+        cursor.close()
+        conexion.close()
+        return {"error": "El usuario ya está registrado"}
+    
     # Hash de la contraseña
     contrasena_hash = get_password_hash(usuario.contrasena)
     
     sql = """
     INSERT INTO usuarios(
-        nombre, apellido_paterno, apellido_materno, correo, 
+        nombre, apellido_paterno, apellido_materno, correo, user,
         contrasena, celular, rol, activo
     )
-    VALUES (%s, %s, %s, %s, %s, %s, %s, %s)
+    VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s)
     """
     datos = (
         usuario.nombre, usuario.apellido_paterno, usuario.apellido_materno,
-        usuario.correo, contrasena_hash, usuario.celular, usuario.rol.value, usuario.activo
+        usuario.correo, usuario.user, contrasena_hash, usuario.celular, usuario.rol.value, usuario.activo
     )
     
     try:
@@ -51,7 +59,7 @@ def ver_todos_usuarios():
         return {"error": "Error de conexión a la base de datos"}
     
     cursor = conexion.cursor(dictionary=True)
-    sql = "SELECT id_usuario, nombre, apellido_paterno, apellido_materno, correo, celular, rol, activo FROM usuarios"
+    sql = "SELECT id_usuario, nombre, apellido_paterno, apellido_materno, correo, user, celular, rol, activo FROM usuarios"
     cursor.execute(sql)
     filas = cursor.fetchall()
     cursor.close()
@@ -64,7 +72,7 @@ def ver_usuario_by_id(id_usuario: int):
         return {"error": "Error de conexión a la base de datos"}
     
     cursor = conexion.cursor(dictionary=True)
-    sql = "SELECT id_usuario, nombre, apellido_paterno, apellido_materno, correo, celular, rol, activo FROM usuarios WHERE id_usuario = %s"
+    sql = "SELECT id_usuario, nombre, apellido_paterno, apellido_materno, correo, user, celular, rol, activo FROM usuarios WHERE id_usuario = %s"
     cursor.execute(sql, (id_usuario,))
     usuario = cursor.fetchone()
     cursor.close()
@@ -97,6 +105,9 @@ def editar_usuario(id_usuario: int, usuario: UsuarioUpdate):
     if usuario.correo is not None:
         campos.append("correo = %s")
         valores.append(usuario.correo)
+    if usuario.user is not None:
+        campos.append("user = %s")
+        valores.append(usuario.user)
     if usuario.celular is not None:
         campos.append("celular = %s")
         valores.append(usuario.celular)
@@ -113,6 +124,25 @@ def editar_usuario(id_usuario: int, usuario: UsuarioUpdate):
         return {"error": "No hay campos para actualizar"}
     
     valores.append(id_usuario)
+    
+    # Verificar si el correo ya existe (si se está actualizando)
+    if usuario.correo is not None:
+        sql_check = "SELECT id_usuario FROM usuarios WHERE correo = %s AND id_usuario != %s"
+        cursor.execute(sql_check, (usuario.correo, id_usuario))
+        if cursor.fetchone():
+            cursor.close()
+            conexion.close()
+            return {"error": "El correo ya está registrado"}
+    
+    # Verificar si el user ya existe (si se está actualizando)
+    if usuario.user is not None:
+        sql_check_user = "SELECT id_usuario FROM usuarios WHERE user = %s AND id_usuario != %s"
+        cursor.execute(sql_check_user, (usuario.user, id_usuario))
+        if cursor.fetchone():
+            cursor.close()
+            conexion.close()
+            return {"error": "El usuario ya está registrado"}
+    
     sql = f"UPDATE usuarios SET {', '.join(campos)} WHERE id_usuario = %s"
     
     try:
