@@ -29,8 +29,6 @@ class ClienteUpdate(BaseModel):
 
 class ClienteResponse(ClienteBase):
     id_cliente: int
-    loyabit_id: Optional[str] = None
-    loyabit_sincronizado: bool = False
     
     class Config:
         from_attributes = True

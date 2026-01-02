@@ -69,3 +69,25 @@ def eliminar_receta(id_receta: int):
         conexion.close()
         return {"error": f"Error al eliminar receta: {str(e)}"}
 
+def eliminar_todas_recetas_producto(id_producto: int):
+    """Elimina todas las recetas de un producto"""
+    conexion = conectar()
+    if not conexion:
+        return {"error": "Error de conexión a la base de datos"}
+    
+    cursor = conexion.cursor()
+    sql = "DELETE FROM recetas_insumos WHERE id_producto = %s"
+    
+    try:
+        cursor.execute(sql, (id_producto,))
+        conexion.commit()
+        recetas_eliminadas = cursor.rowcount
+        cursor.close()
+        conexion.close()
+        return {"message": f"Recetas eliminadas correctamente", "recetas_eliminadas": recetas_eliminadas}
+    except Exception as e:
+        conexion.rollback()
+        cursor.close()
+        conexion.close()
+        return {"error": f"Error al eliminar recetas: {str(e)}"}
+

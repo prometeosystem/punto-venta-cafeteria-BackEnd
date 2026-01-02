@@ -1,5 +1,5 @@
 from repository.receta_repository import (
-    crear_receta, ver_recetas_por_producto, eliminar_receta
+    crear_receta, ver_recetas_por_producto, eliminar_receta, eliminar_todas_recetas_producto
 )
 from schemas.comanda_schema import RecetaInsumoCreate
 
@@ -11,4 +11,7 @@ def ver_recetas_por_producto_service(id_producto: int):
 
 def eliminar_receta_service(id_receta: int):
     return eliminar_receta(id_receta)
+
+def eliminar_todas_recetas_producto_service(id_producto: int):
+    return eliminar_todas_recetas_producto(id_producto)
 

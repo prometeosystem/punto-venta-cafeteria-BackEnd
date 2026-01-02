@@ -7,9 +7,7 @@ from services.inventario_service import (
     editar_insumo_service,
     restar_insumo_service,
     registrar_movimiento_service,
-    obtener_insumos_bajo_stock_service,
-    ver_insumos_normalizados_service,
-    buscar_insumo_por_nombre_service
+    obtener_insumos_bajo_stock_service
 )
 from utils.auth import require_role, get_current_user
 
@@ -59,25 +57,4 @@ async def obtener_insumos_bajo_stock(
 ):
     """Obtener insumos con stock por debajo del mínimo"""
     return obtener_insumos_bajo_stock_service()
-
-@router.get("/insumos_normalizados")
-async def listar_insumos_normalizados(
-    current_user: dict = Depends(get_current_user)
-):
-    """
-    Listar todos los insumos activos con nombre y nombre_normalizado.
-    Útil para crear selects en el frontend y evitar duplicados.
-    """
-    return ver_insumos_normalizados_service()
-
-@router.get("/buscar_insumo/{nombre}")
-async def buscar_insumo(
-    nombre: str,
-    current_user: dict = Depends(get_current_user)
-):
-    """
-    Buscar un insumo por nombre (normalizado).
-    Útil para verificar si un insumo existe antes de crearlo.
-    """
-    return buscar_insumo_por_nombre_service(nombre)
 

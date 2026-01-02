@@ -2,6 +2,56 @@ from database.conexion import conectar
 from schemas.comanda_schema import ComandaCreate, ComandaUpdate, EstadoComandaEnum
 from datetime import datetime
 
+def obtener_info_pedido_para_comanda(cursor, id_venta):
+    """
+    Obtiene información completa del pedido (pre-orden o venta) para una comanda.
+    Primero busca en pre-órdenes, si no existe, busca en ventas.
+    Incluye: origen, ticket_id, nombre_cliente, tipo_servicio, tipo_leche, extra_leche, comentarios
+    """
+    # Buscar en pre-órdenes primero (incluye tanto web como sistema)
+    sql_preorden = """
+    SELECT 
+        id_preorden, 
+        origen,
+        ticket_id,
+        nombre_cliente, 
+        tipo_servicio, 
+        comentarios, 
+        tipo_leche, 
+        extra_leche
+    FROM preordenes
+    WHERE id_venta = %s
+    """
+    cursor.execute(sql_preorden, (id_venta,))
+    preorden = cursor.fetchone()
+    
+    if preorden:
+        return preorden
+    
+    # Si no hay pre-orden, buscar en ventas (para compatibilidad con ventas antiguas)
+    sql_venta = """
+    SELECT tipo_servicio, comentarios, tipo_leche, extra_leche
+    FROM ventas
+    WHERE id_venta = %s
+    """
+    cursor.execute(sql_venta, (id_venta,))
+    venta_info = cursor.fetchone()
+    
+    if venta_info and (venta_info.get("tipo_servicio") or venta_info.get("tipo_leche") or venta_info.get("comentarios")):
+        # Crear estructura similar a pre-orden para consistencia
+        return {
+            "id_preorden": None,
+            "origen": "sistema",  # Asumir sistema si viene de ventas
+            "ticket_id": None,
+            "nombre_cliente": None,
+            "tipo_servicio": venta_info.get("tipo_servicio"),
+            "comentarios": venta_info.get("comentarios"),
+            "tipo_leche": venta_info.get("tipo_leche"),
+            "extra_leche": venta_info.get("extra_leche")
+        }
+    
+    return None
+
 def crear_comanda(comanda: ComandaCreate):
     conexion = conectar()
     if not conexion:
@@ -68,6 +118,11 @@ def ver_comanda_by_id(id_comanda: int):
     detalles = cursor.fetchall()
     
     comanda["detalles"] = detalles
+    
+    # Obtener información del pedido (pre-orden o venta)
+    info_pedido = obtener_info_pedido_para_comanda(cursor, comanda["id_venta"])
+    comanda["preorden"] = info_pedido
+    
     cursor.close()
     conexion.close()
     return comanda
@@ -88,8 +143,9 @@ def ver_comandas_por_estado(estado: EstadoComandaEnum):
     cursor.execute(sql, (estado.value,))
     comandas = cursor.fetchall()
     
-    # Obtener detalles para cada comanda
+    # Obtener detalles y información de pre-orden para cada comanda
     for comanda in comandas:
+        # Obtener detalles de la comanda
         sql_detalles = """
         SELECT dc.*, p.nombre as producto_nombre
         FROM detalles_comanda dc
@@ -98,6 +154,10 @@ def ver_comandas_por_estado(estado: EstadoComandaEnum):
         """
         cursor.execute(sql_detalles, (comanda["id_comanda"],))
         comanda["detalles"] = cursor.fetchall()
+        
+        # Obtener información del pedido (pre-orden o venta)
+        info_pedido = obtener_info_pedido_para_comanda(cursor, comanda["id_venta"])
+        comanda["preorden"] = info_pedido
     
     cursor.close()
     conexion.close()
@@ -112,8 +172,8 @@ def actualizar_estado_comanda(id_comanda: int, estado: EstadoComandaEnum):
     cursor = conexion.cursor(dictionary=True)
     
     try:
-        # Verificar que la comanda existe
-        sql_check = "SELECT estado FROM comandas WHERE id_comanda = %s"
+        # Verificar que la comanda existe y obtener id_venta
+        sql_check = "SELECT estado, id_venta FROM comandas WHERE id_comanda = %s"
         cursor.execute(sql_check, (id_comanda,))
         comanda_actual = cursor.fetchone()
         
@@ -121,6 +181,8 @@ def actualizar_estado_comanda(id_comanda: int, estado: EstadoComandaEnum):
             cursor.close()
             conexion.close()
             return {"error": "Comanda no encontrada"}
+        
+        id_venta = comanda_actual["id_venta"]
         
         # Si se marca como terminada, restar insumos
         if estado == EstadoComandaEnum.TERMINADA and comanda_actual["estado"] != "terminada":
@@ -185,6 +247,31 @@ def actualizar_estado_comanda(id_comanda: int, estado: EstadoComandaEnum):
         """
         cursor.execute(sql_update, (estado.value, datetime.now(), id_comanda))
         
+        # Sincronizar estado de pre-orden si existe
+        if id_venta:
+            # Buscar pre-orden asociada a esta venta
+            sql_preorden = "SELECT id_preorden FROM preordenes WHERE id_venta = %s"
+            cursor.execute(sql_preorden, (id_venta,))
+            preorden = cursor.fetchone()
+            
+            if preorden:
+                # Si la comanda pasa a "en_preparacion", la pre-orden pasa a "en_cocina"
+                if estado == EstadoComandaEnum.EN_PREPARACION:
+                    sql_update_preorden = """
+                    UPDATE preordenes 
+                    SET estado = 'en_cocina', fecha_actualizacion = %s 
+                    WHERE id_preorden = %s
+                    """
+                    cursor.execute(sql_update_preorden, (datetime.now(), preorden["id_preorden"]))
+                # Si la comanda pasa a "terminada", la pre-orden pasa a "lista"
+                elif estado == EstadoComandaEnum.TERMINADA:
+                    sql_update_preorden = """
+                    UPDATE preordenes 
+                    SET estado = 'lista', fecha_actualizacion = %s 
+                    WHERE id_preorden = %s
+                    """
+                    cursor.execute(sql_update_preorden, (datetime.now(), preorden["id_preorden"]))
+        
         conexion.commit()
         cursor.close()
         conexion.close()
@@ -211,6 +298,7 @@ def ver_todas_comandas():
     comandas = cursor.fetchall()
     
     for comanda in comandas:
+        # Obtener detalles de la comanda
         sql_detalles = """
         SELECT dc.*, p.nombre as producto_nombre
         FROM detalles_comanda dc
@@ -219,6 +307,10 @@ def ver_todas_comandas():
         """
         cursor.execute(sql_detalles, (comanda["id_comanda"],))
         comanda["detalles"] = cursor.fetchall()
+        
+        # Obtener información del pedido (pre-orden o venta)
+        info_pedido = obtener_info_pedido_para_comanda(cursor, comanda["id_venta"])
+        comanda["preorden"] = info_pedido
     
     cursor.close()
     conexion.close()

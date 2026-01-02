@@ -19,9 +19,13 @@ async def crear_producto(
     """Crear un nuevo producto"""
     return crear_producto_service(producto)
 
-@router.get("/ver_productos")
-async def listar_productos(current_user: dict = Depends(get_current_user)):
-    """Listar todos los productos activos"""
+@router.get("/ver_productos", summary="Listar productos (PÚBLICO)")
+async def listar_productos():
+    """
+    **ENDPOINT PÚBLICO** - Listar todos los productos activos.
+    
+    No requiere autenticación. Usado por la página web para mostrar el menú.
+    """
     return ver_todos_productos_service()
 
 @router.get("/ver_producto/{id_producto}")

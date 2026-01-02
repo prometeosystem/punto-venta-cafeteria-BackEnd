@@ -7,7 +7,7 @@ CREATE TABLE IF NOT EXISTS usuarios (
     apellido_paterno VARCHAR(100) NOT NULL,
     apellido_materno VARCHAR(100),
     correo VARCHAR(255) UNIQUE NOT NULL,
-    user VARCHAR(100) UNIQUE NOT NULL,
+    user VARCHAR(100) UNIQUE,
     contrasena VARCHAR(255) NOT NULL,
     celular VARCHAR(20),
     rol ENUM('vendedor', 'cocina', 'administrador', 'superadministrador') NOT NULL,
@@ -28,11 +28,10 @@ CREATE TABLE IF NOT EXISTS clientes (
     rfc VARCHAR(20),
     direccion TEXT,
     puntos DECIMAL(10, 2) DEFAULT 0.00,
-    loyabit_id VARCHAR(255) NULL, -- ID del cliente en Loyabit
-    loyabit_sincronizado BOOLEAN DEFAULT FALSE, -- Indica si está sincronizado con Loyabit
+    loyabit_id VARCHAR(255) NULL,
+    loyabit_sincronizado BOOLEAN DEFAULT FALSE,
     fecha_creacion TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    fecha_actualizacion TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
-    INDEX idx_loyabit_id (loyabit_id)
+    fecha_actualizacion TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
 );
 
 -- Tabla de productos
@@ -42,7 +41,7 @@ CREATE TABLE IF NOT EXISTS productos (
     descripcion TEXT,
     precio DECIMAL(10, 2) NOT NULL,
     categoria VARCHAR(100),
-    tiempo_preparacion INT, -- Tiempo en minutos
+    tiempo_preparacion INT,
     activo BOOLEAN DEFAULT TRUE,
     fecha_creacion TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     fecha_actualizacion TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
@@ -52,16 +51,15 @@ CREATE TABLE IF NOT EXISTS productos (
 CREATE TABLE IF NOT EXISTS insumos (
     id_insumo INT AUTO_INCREMENT PRIMARY KEY,
     nombre VARCHAR(255) NOT NULL,
-    nombre_normalizado VARCHAR(255) NOT NULL, -- Nombre sin acentos, en minúsculas para evitar duplicados
+    nombre_normalizado VARCHAR(255),
     descripcion TEXT,
-    unidad_medida VARCHAR(50) NOT NULL, -- kg, litros, unidades, gramos, onzas, etc.
+    unidad_medida VARCHAR(50) NOT NULL, -- kg, litros, unidades, etc.
     cantidad_actual DECIMAL(10, 3) NOT NULL DEFAULT 0,
     cantidad_minima DECIMAL(10, 3) NOT NULL DEFAULT 0,
     precio_compra DECIMAL(10, 2),
     activo BOOLEAN DEFAULT TRUE,
     fecha_creacion TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    fecha_actualizacion TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
-    UNIQUE KEY unique_nombre_normalizado (nombre_normalizado)
+    fecha_actualizacion TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
 );
 
 -- Tabla de movimientos de inventario
@@ -142,7 +140,32 @@ CREATE TABLE IF NOT EXISTS visitas_clientes (
     FOREIGN KEY (id_venta) REFERENCES ventas(id_venta) ON DELETE CASCADE
 );
 
+-- Tabla de pre-órdenes (pedidos públicos desde la web)
+CREATE TABLE IF NOT EXISTS preordenes (
+    id_preorden INT AUTO_INCREMENT PRIMARY KEY,
+    nombre_cliente VARCHAR(255),
+    estado ENUM('preorden', 'en_caja', 'pagada', 'en_cocina', 'lista', 'entregada', 'cancelada') DEFAULT 'preorden',
+    total DECIMAL(10, 2),
+    id_venta INT,
+    fecha_creacion TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    fecha_actualizacion TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    FOREIGN KEY (id_venta) REFERENCES ventas(id_venta) ON DELETE SET NULL
+);
+
+-- Tabla de detalles de pre-orden
+CREATE TABLE IF NOT EXISTS detalles_preorden (
+    id_detalle_preorden INT AUTO_INCREMENT PRIMARY KEY,
+    id_preorden INT NOT NULL,
+    id_producto INT NOT NULL,
+    cantidad INT NOT NULL,
+    observaciones TEXT,
+    FOREIGN KEY (id_preorden) REFERENCES preordenes(id_preorden) ON DELETE CASCADE,
+    FOREIGN KEY (id_producto) REFERENCES productos(id_producto) ON DELETE RESTRICT
+);
+
 -- Índices para mejorar rendimiento
+-- Nota: IF NOT EXISTS no es soportado en todas las versiones de MySQL para índices
+-- El sistema de inicialización manejará los errores de duplicados automáticamente
 CREATE INDEX idx_ventas_fecha ON ventas(fecha_venta);
 CREATE INDEX idx_ventas_cliente ON ventas(id_cliente);
 CREATE INDEX idx_ventas_usuario ON ventas(id_usuario);
@@ -152,4 +175,8 @@ CREATE INDEX idx_visitas_cliente ON visitas_clientes(id_cliente);
 CREATE INDEX idx_visitas_fecha ON visitas_clientes(fecha_visita);
 CREATE INDEX idx_movimientos_insumo ON movimientos_inventario(id_insumo);
 CREATE INDEX idx_movimientos_fecha ON movimientos_inventario(fecha_movimiento);
+CREATE INDEX idx_preordenes_estado ON preordenes(estado);
+CREATE INDEX idx_preordenes_fecha ON preordenes(fecha_creacion);
+CREATE INDEX idx_loyabit_id ON clientes(loyabit_id);
+CREATE UNIQUE INDEX unique_nombre_normalizado ON insumos(nombre_normalizado);
 

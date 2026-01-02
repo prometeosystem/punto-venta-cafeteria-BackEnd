@@ -1,0 +1,456 @@
+# ============================================
+# INSTRUCCIONES PARA REGISTRAR PRODUCTOS
+# ============================================
+
+# PASO 1: Hacer login para obtener el token
+# Reemplaza tu_correo@ejemplo.com y tu_contraseña con tus credenciales
+
+curl -X POST "http://localhost:8000/api/login" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "correo": "tu_correo@ejemplo.com",
+    "contrasena": "tu_contraseña"
+  }'
+
+# Copia el "access_token" de la respuesta y reemplaza TOKEN_AQUI en los siguientes comandos
+
+# ============================================
+# BEBIDAS CALIENTES
+# ============================================
+
+# Americano M
+curl -X POST "http://localhost:8000/api/productos/crear_producto" \
+  -H "Content-Type: application/json" \
+  -H "Authorization: Bearer TOKEN_AQUI" \
+  -d '{"nombre": "Americano M", "descripcion": "Pa'\'' empezar el día.", "precio": 40.00, "categoria": "Bebidas Calientes", "activo": true}'
+
+# Americano G
+curl -X POST "http://localhost:8000/api/productos/crear_producto" \
+  -H "Content-Type: application/json" \
+  -H "Authorization: Bearer TOKEN_AQUI" \
+  -d '{"nombre": "Americano G", "descripcion": "Pa'\'' empezar el día.", "precio": 45.00, "categoria": "Bebidas Calientes", "activo": true}'
+
+# Capuchino M
+curl -X POST "http://localhost:8000/api/productos/crear_producto" \
+  -H "Content-Type: application/json" \
+  -H "Authorization: Bearer TOKEN_AQUI" \
+  -d '{"nombre": "Capuchino M", "descripcion": "Expresso sencillo con leche espumada.", "precio": 55.00, "categoria": "Bebidas Calientes", "activo": true}'
+
+# Capuchino G
+curl -X POST "http://localhost:8000/api/productos/crear_producto" \
+  -H "Content-Type: application/json" \
+  -H "Authorization: Bearer TOKEN_AQUI" \
+  -d '{"nombre": "Capuchino G", "descripcion": "Expresso sencillo con leche espumada.", "precio": 60.00, "categoria": "Bebidas Calientes", "activo": true}'
+
+# Energy Latte M
+curl -X POST "http://localhost:8000/api/productos/crear_producto" \
+  -H "Content-Type: application/json" \
+  -H "Authorization: Bearer TOKEN_AQUI" \
+  -d '{"nombre": "Energy Latte M", "descripcion": "Expresso doble con leche cremosa.", "precio": 60.00, "categoria": "Bebidas Calientes", "activo": true}'
+
+# Energy Latte G
+curl -X POST "http://localhost:8000/api/productos/crear_producto" \
+  -H "Content-Type: application/json" \
+  -H "Authorization: Bearer TOKEN_AQUI" \
+  -d '{"nombre": "Energy Latte G", "descripcion": "Expresso doble con leche cremosa.", "precio": 65.00, "categoria": "Bebidas Calientes", "activo": true}'
+
+# Coco Yuki Latte M
+curl -X POST "http://localhost:8000/api/productos/crear_producto" \
+  -H "Content-Type: application/json" \
+  -H "Authorization: Bearer TOKEN_AQUI" \
+  -d '{"nombre": "Coco Yuki Latte M", "descripcion": "Expresso doble con toque sabor coco y leche cremosa.", "precio": 65.00, "categoria": "Bebidas Calientes", "activo": true}'
+
+# Coco Yuki Latte G
+curl -X POST "http://localhost:8000/api/productos/crear_producto" \
+  -H "Content-Type: application/json" \
+  -H "Authorization: Bearer TOKEN_AQUI" \
+  -d '{"nombre": "Coco Yuki Latte G", "descripcion": "Expresso doble con toque sabor coco y leche cremosa.", "precio": 69.00, "categoria": "Bebidas Calientes", "activo": true}'
+
+# Chai ó Matcha M
+curl -X POST "http://localhost:8000/api/productos/crear_producto" \
+  -H "Content-Type: application/json" \
+  -H "Authorization: Bearer TOKEN_AQUI" \
+  -d '{"nombre": "Chai ó Matcha M", "descripcion": "Tés con leche cremosa.", "precio": 60.00, "categoria": "Bebidas Calientes", "activo": true}'
+
+# Chai ó Matcha G
+curl -X POST "http://localhost:8000/api/productos/crear_producto" \
+  -H "Content-Type: application/json" \
+  -H "Authorization: Bearer TOKEN_AQUI" \
+  -d '{"nombre": "Chai ó Matcha G", "descripcion": "Tés con leche cremosa.", "precio": 65.00, "categoria": "Bebidas Calientes", "activo": true}'
+
+# Chai Sucio M
+curl -X POST "http://localhost:8000/api/productos/crear_producto" \
+  -H "Content-Type: application/json" \
+  -H "Authorization: Bearer TOKEN_AQUI" \
+  -d '{"nombre": "Chai Sucio M", "descripcion": "Té especiado con expresso café y leche cremosa.", "precio": 65.00, "categoria": "Bebidas Calientes", "activo": true}'
+
+# Chai Sucio G
+curl -X POST "http://localhost:8000/api/productos/crear_producto" \
+  -H "Content-Type: application/json" \
+  -H "Authorization: Bearer TOKEN_AQUI" \
+  -d '{"nombre": "Chai Sucio G", "descripcion": "Té especiado con expresso café y leche cremosa.", "precio": 70.00, "categoria": "Bebidas Calientes", "activo": true}'
+
+# Muka Rush M
+curl -X POST "http://localhost:8000/api/productos/crear_producto" \
+  -H "Content-Type: application/json" \
+  -H "Authorization: Bearer TOKEN_AQUI" \
+  -d '{"nombre": "Muka Rush M", "descripcion": "Expresso con chocolate y leche cremosa.", "precio": 65.00, "categoria": "Bebidas Calientes", "activo": true}'
+
+# Muka Rush G
+curl -X POST "http://localhost:8000/api/productos/crear_producto" \
+  -H "Content-Type: application/json" \
+  -H "Authorization: Bearer TOKEN_AQUI" \
+  -d '{"nombre": "Muka Rush G", "descripcion": "Expresso con chocolate y leche cremosa.", "precio": 70.00, "categoria": "Bebidas Calientes", "activo": true}'
+
+# Chocolate Dark Finish M
+curl -X POST "http://localhost:8000/api/productos/crear_producto" \
+  -H "Content-Type: application/json" \
+  -H "Authorization: Bearer TOKEN_AQUI" \
+  -d '{"nombre": "Chocolate Dark Finish M", "descripcion": "Chocolate de tu elección con leche cremosa.", "precio": 65.00, "categoria": "Bebidas Calientes", "activo": true}'
+
+# Chocolate Dark Finish G
+curl -X POST "http://localhost:8000/api/productos/crear_producto" \
+  -H "Content-Type: application/json" \
+  -H "Authorization: Bearer TOKEN_AQUI" \
+  -d '{"nombre": "Chocolate Dark Finish G", "descripcion": "Chocolate de tu elección con leche cremosa.", "precio": 70.00, "categoria": "Bebidas Calientes", "activo": true}'
+
+# Caramel | Irlandés M
+curl -X POST "http://localhost:8000/api/productos/crear_producto" \
+  -H "Content-Type: application/json" \
+  -H "Authorization: Bearer TOKEN_AQUI" \
+  -d '{"nombre": "Caramel | Irlandés M", "descripcion": "Expresso acompañado del sabor a elección y leche cremosa.", "precio": 65.00, "categoria": "Bebidas Calientes", "activo": true}'
+
+# Caramel | Irlandés G
+curl -X POST "http://localhost:8000/api/productos/crear_producto" \
+  -H "Content-Type: application/json" \
+  -H "Authorization: Bearer TOKEN_AQUI" \
+  -d '{"nombre": "Caramel | Irlandés G", "descripcion": "Expresso acompañado del sabor a elección y leche cremosa.", "precio": 70.00, "categoria": "Bebidas Calientes", "activo": true}'
+
+# ============================================
+# BEBIDAS FRÍAS
+# ============================================
+
+# Affogato
+curl -X POST "http://localhost:8000/api/productos/crear_producto" \
+  -H "Content-Type: application/json" \
+  -H "Authorization: Bearer TOKEN_AQUI" \
+  -d '{"nombre": "Affogato", "descripcion": "Bola de helado acompañada de expresso doble.", "precio": 65.00, "categoria": "Bebidas Frías", "activo": true}'
+
+# Iced Americano M
+curl -X POST "http://localhost:8000/api/productos/crear_producto" \
+  -H "Content-Type: application/json" \
+  -H "Authorization: Bearer TOKEN_AQUI" \
+  -d '{"nombre": "Iced Americano M", "descripcion": "Elige tu americano helado o frapeado.", "precio": 50.00, "categoria": "Bebidas Frías", "activo": true}'
+
+# Iced Americano G
+curl -X POST "http://localhost:8000/api/productos/crear_producto" \
+  -H "Content-Type: application/json" \
+  -H "Authorization: Bearer TOKEN_AQUI" \
+  -d '{"nombre": "Iced Americano G", "descripcion": "Elige tu americano helado o frapeado.", "precio": 55.00, "categoria": "Bebidas Frías", "activo": true}'
+
+# Iced Latte M
+curl -X POST "http://localhost:8000/api/productos/crear_producto" \
+  -H "Content-Type: application/json" \
+  -H "Authorization: Bearer TOKEN_AQUI" \
+  -d '{"nombre": "Iced Latte M", "descripcion": "Elige tu latte helado o frapeado.", "precio": 55.00, "categoria": "Bebidas Frías", "activo": true}'
+
+# Iced Latte G
+curl -X POST "http://localhost:8000/api/productos/crear_producto" \
+  -H "Content-Type: application/json" \
+  -H "Authorization: Bearer TOKEN_AQUI" \
+  -d '{"nombre": "Iced Latte G", "descripcion": "Elige tu latte helado o frapeado.", "precio": 60.00, "categoria": "Bebidas Frías", "activo": true}'
+
+# Expresso Honey M
+curl -X POST "http://localhost:8000/api/productos/crear_producto" \
+  -H "Content-Type: application/json" \
+  -H "Authorization: Bearer TOKEN_AQUI" \
+  -d '{"nombre": "Expresso Honey M", "descripcion": "Expresso doble + miel + agua tónica", "precio": 55.00, "categoria": "Bebidas Frías", "activo": true}'
+
+# Expresso Honey G
+curl -X POST "http://localhost:8000/api/productos/crear_producto" \
+  -H "Content-Type: application/json" \
+  -H "Authorization: Bearer TOKEN_AQUI" \
+  -d '{"nombre": "Expresso Honey G", "descripcion": "Expresso doble + miel + agua tónica", "precio": 60.00, "categoria": "Bebidas Frías", "activo": true}'
+
+# Expresso Tonic M
+curl -X POST "http://localhost:8000/api/productos/crear_producto" \
+  -H "Content-Type: application/json" \
+  -H "Authorization: Bearer TOKEN_AQUI" \
+  -d '{"nombre": "Expresso Tonic M", "descripcion": "Expresso doble + agua tónica", "precio": 50.00, "categoria": "Bebidas Frías", "activo": true}'
+
+# Expresso Tonic G
+curl -X POST "http://localhost:8000/api/productos/crear_producto" \
+  -H "Content-Type: application/json" \
+  -H "Authorization: Bearer TOKEN_AQUI" \
+  -d '{"nombre": "Expresso Tonic G", "descripcion": "Expresso doble + agua tónica", "precio": 55.00, "categoria": "Bebidas Frías", "activo": true}'
+
+# Orange Coffee M
+curl -X POST "http://localhost:8000/api/productos/crear_producto" \
+  -H "Content-Type: application/json" \
+  -H "Authorization: Bearer TOKEN_AQUI" \
+  -d '{"nombre": "Orange Coffee M", "descripcion": "Expresso doble + jugo de naranja + agua tónica", "precio": 65.00, "categoria": "Bebidas Frías", "activo": true}'
+
+# Orange Coffee G
+curl -X POST "http://localhost:8000/api/productos/crear_producto" \
+  -H "Content-Type: application/json" \
+  -H "Authorization: Bearer TOKEN_AQUI" \
+  -d '{"nombre": "Orange Coffee G", "descripcion": "Expresso doble + jugo de naranja + agua tónica", "precio": 70.00, "categoria": "Bebidas Frías", "activo": true}'
+
+# Coco Yuki Latte Frío M
+curl -X POST "http://localhost:8000/api/productos/crear_producto" \
+  -H "Content-Type: application/json" \
+  -H "Authorization: Bearer TOKEN_AQUI" \
+  -d '{"nombre": "Coco Yuki Latte Frío M", "descripcion": "Elígelo helado o frapeado", "precio": 70.00, "categoria": "Bebidas Frías", "activo": true}'
+
+# Coco Yuki Latte Frío G
+curl -X POST "http://localhost:8000/api/productos/crear_producto" \
+  -H "Content-Type: application/json" \
+  -H "Authorization: Bearer TOKEN_AQUI" \
+  -d '{"nombre": "Coco Yuki Latte Frío G", "descripcion": "Elígelo helado o frapeado", "precio": 75.00, "categoria": "Bebidas Frías", "activo": true}'
+
+# Chai ó Matcha Frío M
+curl -X POST "http://localhost:8000/api/productos/crear_producto" \
+  -H "Content-Type: application/json" \
+  -H "Authorization: Bearer TOKEN_AQUI" \
+  -d '{"nombre": "Chai ó Matcha Frío M", "descripcion": "Elígelo helado o frapeado", "precio": 70.00, "categoria": "Bebidas Frías", "activo": true}'
+
+# Chai ó Matcha Frío G
+curl -X POST "http://localhost:8000/api/productos/crear_producto" \
+  -H "Content-Type: application/json" \
+  -H "Authorization: Bearer TOKEN_AQUI" \
+  -d '{"nombre": "Chai ó Matcha Frío G", "descripcion": "Elígelo helado o frapeado", "precio": 75.00, "categoria": "Bebidas Frías", "activo": true}'
+
+# Moka Rush Frío M
+curl -X POST "http://localhost:8000/api/productos/crear_producto" \
+  -H "Content-Type: application/json" \
+  -H "Authorization: Bearer TOKEN_AQUI" \
+  -d '{"nombre": "Moka Rush Frío M", "descripcion": "Expresso con chocolate helado o frapeado", "precio": 65.00, "categoria": "Bebidas Frías", "activo": true}'
+
+# Moka Rush Frío G
+curl -X POST "http://localhost:8000/api/productos/crear_producto" \
+  -H "Content-Type: application/json" \
+  -H "Authorization: Bearer TOKEN_AQUI" \
+  -d '{"nombre": "Moka Rush Frío G", "descripcion": "Expresso con chocolate helado o frapeado", "precio": 70.00, "categoria": "Bebidas Frías", "activo": true}'
+
+# Chocolate Dark Finish Frío M
+curl -X POST "http://localhost:8000/api/productos/crear_producto" \
+  -H "Content-Type: application/json" \
+  -H "Authorization: Bearer TOKEN_AQUI" \
+  -d '{"nombre": "Chocolate Dark Finish Frío M", "descripcion": "Chocolate de tu gusto helado o frapeado", "precio": 60.00, "categoria": "Bebidas Frías", "activo": true}'
+
+# Chocolate Dark Finish Frío G
+curl -X POST "http://localhost:8000/api/productos/crear_producto" \
+  -H "Content-Type: application/json" \
+  -H "Authorization: Bearer TOKEN_AQUI" \
+  -d '{"nombre": "Chocolate Dark Finish Frío G", "descripcion": "Chocolate de tu gusto helado o frapeado", "precio": 65.00, "categoria": "Bebidas Frías", "activo": true}'
+
+# Caramel | Irlandés | Pistache | Taro M
+curl -X POST "http://localhost:8000/api/productos/crear_producto" \
+  -H "Content-Type: application/json" \
+  -H "Authorization: Bearer TOKEN_AQUI" \
+  -d '{"nombre": "Caramel | Irlandés | Pistache | Taro M", "descripcion": "Elígelo helado o frapeado", "precio": 70.00, "categoria": "Bebidas Frías", "activo": true}'
+
+# Caramel | Irlandés | Pistache | Taro G
+curl -X POST "http://localhost:8000/api/productos/crear_producto" \
+  -H "Content-Type: application/json" \
+  -H "Authorization: Bearer TOKEN_AQUI" \
+  -d '{"nombre": "Caramel | Irlandés | Pistache | Taro G", "descripcion": "Elígelo helado o frapeado", "precio": 75.00, "categoria": "Bebidas Frías", "activo": true}'
+
+# Smoothie de Mango ó Fresa M
+curl -X POST "http://localhost:8000/api/productos/crear_producto" \
+  -H "Content-Type: application/json" \
+  -H "Authorization: Bearer TOKEN_AQUI" \
+  -d '{"nombre": "Smoothie de Mango ó Fresa M", "descripcion": "Frappé base agua ó leche de tu fruta favorita", "precio": 70.00, "categoria": "Bebidas Frías", "activo": true}'
+
+# Smoothie de Mango ó Fresa G
+curl -X POST "http://localhost:8000/api/productos/crear_producto" \
+  -H "Content-Type: application/json" \
+  -H "Authorization: Bearer TOKEN_AQUI" \
+  -d '{"nombre": "Smoothie de Mango ó Fresa G", "descripcion": "Frappé base agua ó leche de tu fruta favorita", "precio": 75.00, "categoria": "Bebidas Frías", "activo": true}'
+
+# ============================================
+# BEBIDAS FITNESS - ENTRENAMIENTO
+# ============================================
+
+# Sprint shot
+curl -X POST "http://localhost:8000/api/productos/crear_producto" \
+  -H "Content-Type: application/json" \
+  -H "Authorization: Bearer TOKEN_AQUI" \
+  -d '{"nombre": "Sprint shot", "descripcion": "Un expresso doble de energía para activar tu entrenamiento.", "precio": 40.00, "categoria": "Bebidas Fitness", "activo": true}'
+
+# Peak point macchiato
+curl -X POST "http://localhost:8000/api/productos/crear_producto" \
+  -H "Content-Type: application/json" \
+  -H "Authorization: Bearer TOKEN_AQUI" \
+  -d '{"nombre": "Peak point macchiato", "descripcion": "Expresso doble con un toque de espuma de leche, un boost suave pero decidido.", "precio": 45.00, "categoria": "Bebidas Fitness", "activo": true}'
+
+# Flat White Run
+curl -X POST "http://localhost:8000/api/productos/crear_producto" \
+  -H "Content-Type: application/json" \
+  -H "Authorization: Bearer TOKEN_AQUI" \
+  -d '{"nombre": "Flat White Run", "descripcion": "Expresso doble con leche cremosa, ideal para enfoque sostenido.", "precio": 55.00, "categoria": "Bebidas Fitness", "activo": true}'
+
+# Long Run Americano
+curl -X POST "http://localhost:8000/api/productos/crear_producto" \
+  -H "Content-Type: application/json" \
+  -H "Authorization: Bearer TOKEN_AQUI" \
+  -d '{"nombre": "Long Run Americano", "descripcion": "Ligero y limpio para resistencia prolongada.", "precio": 50.00, "categoria": "Bebidas Fitness", "activo": true}'
+
+# Energy Latte Fitness
+curl -X POST "http://localhost:8000/api/productos/crear_producto" \
+  -H "Content-Type: application/json" \
+  -H "Authorization: Bearer TOKEN_AQUI" \
+  -d '{"nombre": "Energy Latte Fitness", "descripcion": "Clásico expresso doble con leche para recuperar energía.", "precio": 65.00, "categoria": "Bebidas Fitness", "activo": true}'
+
+# ============================================
+# BEBIDAS FITNESS - CON PROTEÍNA/CREATINA
+# ============================================
+
+# Recovery Dúo Fruit
+curl -X POST "http://localhost:8000/api/productos/crear_producto" \
+  -H "Content-Type: application/json" \
+  -H "Authorization: Bearer TOKEN_AQUI" \
+  -d '{"nombre": "Recovery Dúo Fruit", "descripcion": "Bebida base leche + plátano + fresas + scoop", "precio": 65.00, "categoria": "Bebidas Fitness", "activo": true}'
+
+# Power Boost Latte
+curl -X POST "http://localhost:8000/api/productos/crear_producto" \
+  -H "Content-Type: application/json" \
+  -H "Authorization: Bearer TOKEN_AQUI" \
+  -d '{"nombre": "Power Boost Latte", "descripcion": "Bebida base leche + café + scoop", "precio": 65.00, "categoria": "Bebidas Fitness", "activo": true}'
+
+# Muscle Peanut
+curl -X POST "http://localhost:8000/api/productos/crear_producto" \
+  -H "Content-Type: application/json" \
+  -H "Authorization: Bearer TOKEN_AQUI" \
+  -d '{"nombre": "Muscle Peanut", "descripcion": "Bebida base leche + crema de cacahuate + plátano + scoop", "precio": 70.00, "categoria": "Bebidas Fitness", "activo": true}'
+
+# Mango Marathon
+curl -X POST "http://localhost:8000/api/productos/crear_producto" \
+  -H "Content-Type: application/json" \
+  -H "Authorization: Bearer TOKEN_AQUI" \
+  -d '{"nombre": "Mango Marathon", "descripcion": "Bebida base leche + mango + miel + yogurt griego + scoop", "precio": 75.00, "categoria": "Bebidas Fitness", "activo": true}'
+
+# Speed Up Red
+curl -X POST "http://localhost:8000/api/productos/crear_producto" \
+  -H "Content-Type: application/json" \
+  -H "Authorization: Bearer TOKEN_AQUI" \
+  -d '{"nombre": "Speed Up Red", "descripcion": "Bebida base yogurt griego + frutos rojos + avena + scoop", "precio": 78.00, "categoria": "Bebidas Fitness", "activo": true}'
+
+# Zona Pro Matcha
+curl -X POST "http://localhost:8000/api/productos/crear_producto" \
+  -H "Content-Type: application/json" \
+  -H "Authorization: Bearer TOKEN_AQUI" \
+  -d '{"nombre": "Zona Pro Matcha", "descripcion": "Bebida base leche + matcha + miel + fresas + scoop", "precio": 80.00, "categoria": "Bebidas Fitness", "activo": true}'
+
+# Core Blue
+curl -X POST "http://localhost:8000/api/productos/crear_producto" \
+  -H "Content-Type: application/json" \
+  -H "Authorization: Bearer TOKEN_AQUI" \
+  -d '{"nombre": "Core Blue", "descripcion": "Bebida base leche + moras + plátano + espirulina azul + scoop", "precio": 80.00, "categoria": "Bebidas Fitness", "activo": true}'
+
+# Antioxidant Fruit
+curl -X POST "http://localhost:8000/api/productos/crear_producto" \
+  -H "Content-Type: application/json" \
+  -H "Authorization: Bearer TOKEN_AQUI" \
+  -d '{"nombre": "Antioxidant Fruit", "descripcion": "Agua de coco + espirulina azul + fresas + avena + scoop", "precio": 85.00, "categoria": "Bebidas Fitness", "activo": true}'
+
+# Runner Brew
+curl -X POST "http://localhost:8000/api/productos/crear_producto" \
+  -H "Content-Type: application/json" \
+  -H "Authorization: Bearer TOKEN_AQUI" \
+  -d '{"nombre": "Runner Brew", "descripcion": "Bebida base yogurt griego + mango + miel + matcha + scoop", "precio": 88.00, "categoria": "Bebidas Fitness", "activo": true}'
+
+# ============================================
+# MENÚ DULCE
+# ============================================
+
+# Yogur Bloom
+curl -X POST "http://localhost:8000/api/productos/crear_producto" \
+  -H "Content-Type: application/json" \
+  -H "Authorization: Bearer TOKEN_AQUI" \
+  -d '{"nombre": "Yogur Bloom", "descripcion": "Yogurt griego + granola + miel + fruta de temporada", "precio": 98.00, "categoria": "Menú Dulce", "activo": true}'
+
+# Pan de temporada
+curl -X POST "http://localhost:8000/api/productos/crear_producto" \
+  -H "Content-Type: application/json" \
+  -H "Authorization: Bearer TOKEN_AQUI" \
+  -d '{"nombre": "Pan de temporada", "descripcion": "Pregunta por disponibilidad del pan recién horneado", "precio": 75.00, "categoria": "Menú Dulce", "activo": true}'
+
+# Chocobanana Sando
+curl -X POST "http://localhost:8000/api/productos/crear_producto" \
+  -H "Content-Type: application/json" \
+  -H "Authorization: Bearer TOKEN_AQUI" \
+  -d '{"nombre": "Chocobanana Sando", "descripcion": "Chocolate y plátano", "precio": 67.00, "categoria": "Menú Dulce", "activo": true}'
+
+# Fruit Sando
+curl -X POST "http://localhost:8000/api/productos/crear_producto" \
+  -H "Content-Type: application/json" \
+  -H "Authorization: Bearer TOKEN_AQUI" \
+  -d '{"nombre": "Fruit Sando", "descripcion": "Fresas, durazno y kiwi", "precio": 89.00, "categoria": "Menú Dulce", "activo": true}'
+
+# Ichigo Sando
+curl -X POST "http://localhost:8000/api/productos/crear_producto" \
+  -H "Content-Type: application/json" \
+  -H "Authorization: Bearer TOKEN_AQUI" \
+  -d '{"nombre": "Ichigo Sando", "descripcion": "Fresas frescas", "precio": 92.00, "categoria": "Menú Dulce", "activo": true}'
+
+# ============================================
+# MENÚ SALADO
+# ============================================
+
+# Classic Sando
+curl -X POST "http://localhost:8000/api/productos/crear_producto" \
+  -H "Content-Type: application/json" \
+  -H "Authorization: Bearer TOKEN_AQUI" \
+  -d '{"nombre": "Classic Sando", "descripcion": "Jamón, queso y tocino dulce crujiente", "precio": 89.00, "categoria": "Menú Salado", "activo": true}'
+
+# Tamago Sando
+curl -X POST "http://localhost:8000/api/productos/crear_producto" \
+  -H "Content-Type: application/json" \
+  -H "Authorization: Bearer TOKEN_AQUI" \
+  -d '{"nombre": "Tamago Sando", "descripcion": "Ensalada de huevo", "precio": 60.00, "categoria": "Menú Salado", "activo": true}'
+
+# Mila Sando
+curl -X POST "http://localhost:8000/api/productos/crear_producto" \
+  -H "Content-Type: application/json" \
+  -H "Authorization: Bearer TOKEN_AQUI" \
+  -d '{"nombre": "Mila Sando", "descripcion": "Milanesa de res", "precio": 145.00, "categoria": "Menú Salado", "activo": true}'
+
+# ============================================
+# ENSALADAS
+# ============================================
+
+# Huevito Bowl
+curl -X POST "http://localhost:8000/api/productos/crear_producto" \
+  -H "Content-Type: application/json" \
+  -H "Authorization: Bearer TOKEN_AQUI" \
+  -d '{"nombre": "Huevito Bowl", "descripcion": "Bowl a base de lechuga italiana, espinaca, zanahoria, betabel. Cherry, huevo duro y aderezo a elección", "precio": 125.00, "categoria": "Ensaladas", "activo": true}'
+
+# Tuna fit
+curl -X POST "http://localhost:8000/api/productos/crear_producto" \
+  -H "Content-Type: application/json" \
+  -H "Authorization: Bearer TOKEN_AQUI" \
+  -d '{"nombre": "Tuna fit", "descripcion": "Bowl a base de lechuga italiana, espinaca, zanahoria, betabel. Cherry, atún y aderezo a elección", "precio": 135.00, "categoria": "Ensaladas", "activo": true}'
+
+# Mlla Green
+curl -X POST "http://localhost:8000/api/productos/crear_producto" \
+  -H "Content-Type: application/json" \
+  -H "Authorization: Bearer TOKEN_AQUI" \
+  -d '{"nombre": "Mlla Green", "descripcion": "Bowl a base de lechuga italiana, espinaca, zanahoria, betabel. Cherry, milanesa de res, empanizado de la casa", "precio": 145.00, "categoria": "Ensaladas", "activo": true}'
+
+# ============================================
+# OTROS PLATILLOS
+# ============================================
+
+# Molletes
+curl -X POST "http://localhost:8000/api/productos/crear_producto" \
+  -H "Content-Type: application/json" \
+  -H "Authorization: Bearer TOKEN_AQUI" \
+  -d '{"nombre": "Molletes", "descripcion": "Pan de la casa, frijoles, queso manchego, pico de gallo, chorizo o huevo", "precio": 0.00, "categoria": "Otros", "activo": true}'
+
+# Chilaquiles
+curl -X POST "http://localhost:8000/api/productos/crear_producto" \
+  -H "Content-Type: application/json" \
+  -H "Authorization: Bearer TOKEN_AQUI" \
+  -d '{"nombre": "Chilaquiles", "descripcion": "Totopos, crema, queso, salsa de la casa, huevo ó pollo, acompañados de frijoles refritos", "precio": 0.00, "categoria": "Otros", "activo": true}'
+

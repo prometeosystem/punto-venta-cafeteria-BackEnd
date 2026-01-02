@@ -8,6 +8,7 @@ class DetalleVentaBase(BaseModel):
     cantidad: int
     precio_unitario: Decimal
     subtotal: Decimal
+    observaciones: Optional[str] = None  # Observaciones del producto (ej: "Sin azúcar")
 
 class DetalleVentaCreate(DetalleVentaBase):
     pass
@@ -25,6 +26,10 @@ class VentaBase(BaseModel):
     total: Decimal
     metodo_pago: str  # efectivo, tarjeta, transferencia
     detalles: List[DetalleVentaCreate]
+    tipo_servicio: Optional[str] = None  # "comer-aqui" o "para-llevar"
+    comentarios: Optional[str] = None  # Comentarios generales del pedido
+    tipo_leche: Optional[str] = None  # "entera" o "deslactosada"
+    extra_leche: Optional[Decimal] = None  # Monto extra ($15) por leche deslactosada
     
     class Config:
         json_schema_extra = {
@@ -60,6 +65,10 @@ class VentaResponse(BaseModel):
     total: Decimal
     metodo_pago: str
     fecha_venta: datetime
+    tipo_servicio: Optional[str] = None
+    comentarios: Optional[str] = None
+    tipo_leche: Optional[str] = None
+    extra_leche: Optional[Decimal] = None
     detalles: List[DetalleVentaResponse]
     
     class Config:

@@ -1,39 +1,53 @@
-from pydantic import BaseModel
+from pydantic import BaseModel, field_validator, model_validator
 from typing import Optional, List
 from decimal import Decimal
-
-class InsumoRecetaBase(BaseModel):
-    """Schema para un insumo en una receta"""
-    nombre_insumo: str  # Nombre del insumo (se buscará por nombre normalizado)
-    cantidad_necesaria: Decimal
-    unidad_medida: str  # Debe coincidir con la unidad del insumo
-
-class InsumoRecetaCreate(InsumoRecetaBase):
-    """Para crear un insumo nuevo si no existe"""
-    crear_si_no_existe: bool = False  # Si es True y no existe, se crea
-    descripcion: Optional[str] = None
-    cantidad_actual: Optional[Decimal] = Decimal(0)  # Solo si se crea nuevo
-    cantidad_minima: Optional[Decimal] = Decimal(0)  # Solo si se crea nuevo
-    precio_compra: Optional[Decimal] = Decimal(0)  # Solo si se crea nuevo
 
 class ProductoBase(BaseModel):
     nombre: str
     descripcion: Optional[str] = None
     precio: Decimal
     categoria: str
-    tiempo_preparacion: Optional[int] = None  # Tiempo en minutos
     activo: bool = True
 
+# Esquema para crear un insumo nuevo desde la creación de producto
+class InsumoNuevoCreate(BaseModel):
+    nombre: str
+    descripcion: Optional[str] = None
+    unidad_medida: str  # gramos, kg, litros, mililitros, onzas, piezas, unidades, etc.
+    cantidad_actual: Decimal
+    cantidad_minima: Decimal
+    precio_compra: Decimal
+    activo: bool = True
+
+# Esquema para relacionar insumo con producto (puede ser existente o nuevo)
+class RecetaInsumoEnProducto(BaseModel):
+    # Si id_insumo está presente, usa insumo existente
+    id_insumo: Optional[int] = None
+    # Si insumo_nuevo está presente, crea el insumo primero
+    insumo_nuevo: Optional[InsumoNuevoCreate] = None
+    cantidad_necesaria: Decimal
+    
+    @model_validator(mode='after')
+    def validate_insumo(self):
+        """Valida que se proporcione id_insumo O insumo_nuevo, pero no ambos ni ninguno"""
+        if not self.id_insumo and not self.insumo_nuevo:
+            raise ValueError("Debe proporcionar 'id_insumo' o 'insumo_nuevo'")
+        if self.id_insumo and self.insumo_nuevo:
+            raise ValueError("No puede proporcionar 'id_insumo' e 'insumo_nuevo' al mismo tiempo")
+        return self
+
 class ProductoCreate(ProductoBase):
-    insumos: Optional[List[InsumoRecetaCreate]] = []  # Lista de insumos para la receta
+    # Lista opcional de insumos/recetas para el producto
+    recetas: Optional[List[RecetaInsumoEnProducto]] = None
 
 class ProductoUpdate(BaseModel):
     nombre: Optional[str] = None
     descripcion: Optional[str] = None
     precio: Optional[Decimal] = None
     categoria: Optional[str] = None
-    tiempo_preparacion: Optional[int] = None
     activo: Optional[bool] = None
+    # Lista opcional de recetas para actualizar (si se proporciona, reemplaza todas las recetas existentes)
+    recetas: Optional[List[RecetaInsumoEnProducto]] = None
 
 class ProductoResponse(ProductoBase):
     id_producto: int

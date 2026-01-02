@@ -5,14 +5,13 @@ from decimal import Decimal
 class InsumoBase(BaseModel):
     nombre: str
     descripcion: Optional[str] = None
-    unidad_medida: str  # gramos, litros, unidades, etc.
+    unidad_medida: str  # kg, litros, unidades, etc.
     cantidad_actual: Decimal
     cantidad_minima: Decimal  # Stock mínimo
     precio_compra: Decimal
     activo: bool = True
 
 class InsumoCreate(InsumoBase):
-    # nombre_normalizado se genera automáticamente en el repository
     pass
 
 class InsumoUpdate(BaseModel):
@@ -26,7 +25,6 @@ class InsumoUpdate(BaseModel):
 
 class InsumoResponse(InsumoBase):
     id_insumo: int
-    nombre_normalizado: str
     
     class Config:
         from_attributes = True

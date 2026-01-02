@@ -1,6 +1,11 @@
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from routes.routes import api_router
+from database.init_db import init_database
+
+# Inicializar base de datos al arrancar (similar a Spring Boot ddl-auto=update)
+print("🔄 Inicializando base de datos...")
+init_database()
 
 # Configuración de metadatos para Swagger
 description = """
@@ -67,6 +72,10 @@ tags_metadata = [
         "name": "Recetas",
         "description": "Gestión de recetas que relacionan productos con insumos necesarios.",
     },
+    {
+        "name": "Pre-órdenes",
+        "description": "Sistema de pedidos públicos desde la página web. Los clientes pueden crear pre-órdenes sin autenticación, que luego pasan por caja y cocina.",
+    },
 ]
 
 app = FastAPI(
@@ -122,7 +131,8 @@ async def root():
             "inventario": "/api/inventario",
             "ventas": "/api/ventas",
             "comandas": "/api/comandas",
-            "recetas": "/api/recetas"
+            "recetas": "/api/recetas",
+            "preordenes": "/api/preordenes"
         }
     }
 

@@ -7,8 +7,7 @@ from controllers.inventario_controller import router as inventario_router
 from controllers.venta_controller import router as venta_router
 from controllers.comanda_controller import router as comanda_router
 from controllers.receta_controller import router as receta_router
-# TODO: Descomentar cuando se configure la integración con Loyabit
-# from controllers.loyabit_controller import router as loyabit_router
+from controllers.preorden_controller import router as preorden_router
 
 api_router = APIRouter()
 
@@ -36,7 +35,5 @@ api_router.include_router(comanda_router, prefix="/api/comandas", tags=["Comanda
 # Rutas de recetas
 api_router.include_router(receta_router, prefix="/api/recetas", tags=["Recetas"])
 
-# TODO: Descomentar cuando se configure la integración con Loyabit
-# Ver README_LOYABIT.md para instrucciones de configuración
-# Rutas de integración con Loyabit
-# api_router.include_router(loyabit_router, prefix="/api/loyabit", tags=["Loyabit"])
+# Rutas de pre-órdenes (pedidos públicos)
+api_router.include_router(preorden_router, prefix="/api/preordenes", tags=["Pre-órdenes"])

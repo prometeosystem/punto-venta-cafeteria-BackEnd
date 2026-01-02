@@ -16,7 +16,18 @@ oauth2_scheme = OAuth2PasswordBearer(tokenUrl="api/login")
 
 def verify_password(plain_password: str, hashed_password: str) -> bool:
     """Verifica si la contraseña coincide con el hash"""
-    return pwd_context.verify(plain_password, hashed_password)
+    try:
+        return pwd_context.verify(plain_password, hashed_password)
+    except Exception:
+        # Fallback a bcrypt directo si passlib falla (compatibilidad)
+        import bcrypt
+        try:
+            return bcrypt.checkpw(
+                plain_password.encode('utf-8'), 
+                hashed_password.encode('utf-8')
+            )
+        except Exception:
+            return False
 
 def get_password_hash(password: str) -> str:
     """Genera el hash de la contraseña"""
@@ -46,22 +57,9 @@ def get_usuario_by_correo(correo: str):
     conexion.close()
     return usuario
 
-def get_usuario_by_correo_o_user(correo_o_user: str):
-    """Obtiene un usuario por su correo o user"""
-    conexion = conectar()
-    if not conexion:
-        return None
-    cursor = conexion.cursor(dictionary=True)
-    sql = "SELECT * FROM usuarios WHERE correo = %s OR user = %s"
-    cursor.execute(sql, (correo_o_user, correo_o_user))
-    usuario = cursor.fetchone()
-    cursor.close()
-    conexion.close()
-    return usuario
-
-def authenticate_user(correo_o_user: str, password: str):
-    """Autentica un usuario por correo o user"""
-    usuario = get_usuario_by_correo_o_user(correo_o_user)
+def authenticate_user(correo: str, password: str):
+    """Autentica un usuario"""
+    usuario = get_usuario_by_correo(correo)
     if not usuario:
         return False
     if not verify_password(password, usuario["contrasena"]):
@@ -77,12 +75,12 @@ async def get_current_user(token: str = Depends(oauth2_scheme)):
     )
     try:
         payload = jwt.decode(token, SECRET_KEY, algorithms=[ALGORITHM])
-        correo_o_user: str = payload.get("sub")
-        if correo_o_user is None:
+        correo: str = payload.get("sub")
+        if correo is None:
             raise credentials_exception
     except JWTError:
         raise credentials_exception
-    usuario = get_usuario_by_correo_o_user(correo_o_user)
+    usuario = get_usuario_by_correo(correo)
     if usuario is None:
         raise credentials_exception
     return usuario
