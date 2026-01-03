@@ -4,7 +4,8 @@ from services.venta_service import (
     crear_venta_service,
     ver_venta_by_id_service,
     ver_todas_ventas_service,
-    ver_ventas_por_fecha_service
+    ver_ventas_por_fecha_service,
+    obtener_info_ticket_actual_service
 )
 from utils.auth import require_role, get_current_user
 
@@ -58,4 +59,21 @@ async def listar_ventas(
     if fecha_inicio and fecha_fin:
         return ver_ventas_por_fecha_service(fecha_inicio, fecha_fin)
     return ver_todas_ventas_service()
+
+@router.get("/info_ticket_actual", summary="Obtener información del ticket actual")
+async def obtener_info_ticket_actual(
+    current_user: dict = Depends(get_current_user)
+):
+    """
+    Obtiene información sobre el ticket actual en el punto de venta.
+    
+    Retorna:
+    - `ultimo_ticket_id`: Último ticket_id generado
+    - `tickets_hoy`: Cantidad de tickets generados hoy
+    - `siguiente_ticket_id`: Preview del siguiente ticket_id que se generará
+    - `fecha_actual`: Fecha actual
+    
+    **Permisos requeridos:** Cualquier usuario autenticado
+    """
+    return obtener_info_ticket_actual_service()
 

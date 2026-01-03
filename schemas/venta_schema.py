@@ -22,6 +22,7 @@ class DetalleVentaResponse(DetalleVentaBase):
 
 class VentaBase(BaseModel):
     id_cliente: Optional[int] = None
+    nombre_cliente: Optional[str] = None  # Nombre del cliente si se ingresa manualmente (sin registro)
     id_usuario: int  # Vendedor
     total: Decimal
     metodo_pago: str  # efectivo, tarjeta, transferencia

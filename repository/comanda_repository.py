@@ -32,20 +32,28 @@ def obtener_info_pedido_para_comanda(cursor, id_venta):
     
     # Si no hay pre-orden, buscar en ventas (para compatibilidad con ventas antiguas)
     sql_venta = """
-    SELECT tipo_servicio, comentarios, tipo_leche, extra_leche
-    FROM ventas
-    WHERE id_venta = %s
+    SELECT v.tipo_servicio, v.comentarios, v.tipo_leche, v.extra_leche, v.id_cliente
+    FROM ventas v
+    WHERE v.id_venta = %s
     """
     cursor.execute(sql_venta, (id_venta,))
     venta_info = cursor.fetchone()
     
     if venta_info and (venta_info.get("tipo_servicio") or venta_info.get("tipo_leche") or venta_info.get("comentarios")):
+        # Obtener nombre del cliente si existe
+        nombre_cliente = None
+        if venta_info.get("id_cliente"):
+            cursor.execute("SELECT nombre FROM clientes WHERE id_cliente = %s", (venta_info["id_cliente"],))
+            cliente_info = cursor.fetchone()
+            if cliente_info:
+                nombre_cliente = cliente_info.get("nombre")  # cursor dictionary=True
+        
         # Crear estructura similar a pre-orden para consistencia
         return {
             "id_preorden": None,
             "origen": "sistema",  # Asumir sistema si viene de ventas
             "ticket_id": None,
-            "nombre_cliente": None,
+            "nombre_cliente": nombre_cliente,  # Obtener del cliente
             "tipo_servicio": venta_info.get("tipo_servicio"),
             "comentarios": venta_info.get("comentarios"),
             "tipo_leche": venta_info.get("tipo_leche"),

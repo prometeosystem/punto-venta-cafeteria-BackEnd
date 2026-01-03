@@ -55,6 +55,29 @@ def crear_venta(venta: VentaCreate):
         # Esto unifica pre-órdenes web y órdenes del sistema en la misma tabla
         ticket_id = generar_ticket_id()
         
+        # Obtener nombre del cliente
+        # Prioridad: 1) nombre_cliente del request, 2) nombre del cliente registrado
+        nombre_cliente_preorden = None
+        print(f"[DEBUG] Venta recibida - id_cliente: {venta.id_cliente}, nombre_cliente: {venta.nombre_cliente}")
+        
+        if venta.nombre_cliente and venta.nombre_cliente.strip():
+            # Si se proporciona nombre_cliente directamente, usarlo
+            nombre_cliente_preorden = venta.nombre_cliente.strip()
+            print(f"[DEBUG] Usando nombre_cliente del request: {nombre_cliente_preorden}")
+        elif venta.id_cliente:
+            # Si no, buscar el nombre del cliente registrado
+            cursor.execute("SELECT nombre FROM clientes WHERE id_cliente = %s", (venta.id_cliente,))
+            cliente_info = cursor.fetchone()
+            if cliente_info:
+                nombre_cliente_preorden = cliente_info[0]  # cursor normal, acceso por índice
+                print(f"[DEBUG] Usando nombre del cliente registrado: {nombre_cliente_preorden}")
+            else:
+                print(f"[DEBUG] Cliente ID {venta.id_cliente} no encontrado")
+        else:
+            print(f"[DEBUG] No se proporcionó ni nombre_cliente ni id_cliente")
+        
+        print(f"[DEBUG] nombre_cliente_preorden final: {nombre_cliente_preorden}")
+        
         # Calcular total de productos (sin incluir extra_leche en detalles)
         total_productos = sum(float(detalle.subtotal) for detalle in venta.detalles)
         extra_leche_valor = float(venta.extra_leche) if venta.extra_leche else 0
@@ -68,7 +91,7 @@ def crear_venta(venta: VentaCreate):
         VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)
         """
         datos_pedido = (
-            None,  # nombre_cliente (se puede obtener del cliente si existe)
+            nombre_cliente_preorden,  # Obtener del cliente si existe
             'pagada',  # estado: ya está pagada
             total_pedido,
             venta_id,
@@ -216,6 +239,56 @@ def ver_todas_ventas():
     cursor.close()
     conexion.close()
     return ventas
+
+def obtener_info_ticket_actual():
+    """Obtiene información sobre el ticket actual (número secuencial del día)"""
+    conexion = conectar()
+    if not conexion:
+        return {"error": "Error de conexión a la base de datos"}
+    
+    cursor = conexion.cursor(dictionary=True)
+    
+    try:
+        # Contar tickets del día actual (incluyendo los que ya tienen ticket_id)
+        fecha_hoy = datetime.now().strftime("%Y-%m-%d")
+        cursor.execute("""
+            SELECT COUNT(*) as total_tickets_hoy
+            FROM preordenes
+            WHERE DATE(fecha_creacion) = %s
+        """, (fecha_hoy,))
+        contador_dia = cursor.fetchone()
+        
+        # Obtener el último ticket_id generado
+        cursor.execute("""
+            SELECT ticket_id, fecha_creacion
+            FROM preordenes
+            WHERE ticket_id IS NOT NULL
+            ORDER BY fecha_creacion DESC
+            LIMIT 1
+        """)
+        ultimo_ticket = cursor.fetchone()
+        
+        # Calcular el número de ticket actual (siguiente número)
+        numero_ticket_actual = (contador_dia["total_tickets_hoy"] if contador_dia else 0) + 1
+        
+        # Generar el siguiente ticket_id que se usaría
+        siguiente_ticket_id = generar_ticket_id()
+        
+        cursor.close()
+        conexion.close()
+        
+        return {
+            "numero_ticket_actual": numero_ticket_actual,  # Número secuencial del día (ej: 19, 20, 21...)
+            "ultimo_ticket_id": ultimo_ticket["ticket_id"] if ultimo_ticket else None,
+            "fecha_ultimo_ticket": ultimo_ticket["fecha_creacion"].isoformat() if ultimo_ticket and ultimo_ticket.get("fecha_creacion") else None,
+            "tickets_hoy": contador_dia["total_tickets_hoy"] if contador_dia else 0,
+            "siguiente_ticket_id": siguiente_ticket_id,  # Preview del siguiente ticket_id completo
+            "fecha_actual": fecha_hoy
+        }
+    except Exception as e:
+        cursor.close()
+        conexion.close()
+        return {"error": f"Error al obtener información del ticket: {str(e)}"}
 
 def ver_ventas_por_fecha(fecha_inicio: str, fecha_fin: str):
     conexion = conectar()
