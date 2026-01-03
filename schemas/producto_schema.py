@@ -10,22 +10,20 @@ class ProductoBase(BaseModel):
     activo: bool = True
 
 # Esquema para crear un insumo nuevo desde la creación de producto
+# Solo datos básicos - sin unidad de medida (va en la receta)
 class InsumoNuevoCreate(BaseModel):
     nombre: str
     descripcion: Optional[str] = None
-    unidad_medida: str  # gramos, kg, litros, mililitros, onzas, piezas, unidades, etc.
-    cantidad_actual: Decimal
-    cantidad_minima: Decimal
-    precio_compra: Decimal
-    activo: bool = True
 
 # Esquema para relacionar insumo con producto (puede ser existente o nuevo)
+# La unidad de medida va aquí porque es específica de cómo se usa en este producto
 class RecetaInsumoEnProducto(BaseModel):
     # Si id_insumo está presente, usa insumo existente
     id_insumo: Optional[int] = None
     # Si insumo_nuevo está presente, crea el insumo primero
     insumo_nuevo: Optional[InsumoNuevoCreate] = None
     cantidad_necesaria: Decimal
+    unidad_medida: str  # gramos, kg, litros, mililitros, onzas, piezas, unidades, etc.
     
     @model_validator(mode='after')
     def validate_insumo(self):

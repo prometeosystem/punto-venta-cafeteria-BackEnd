@@ -7,11 +7,32 @@ def crear_receta(receta: RecetaInsumoCreate):
         return {"error": "Error de conexión a la base de datos"}
     
     cursor = conexion.cursor()
-    sql = """
-    INSERT INTO recetas_insumos(id_producto, id_insumo, cantidad_necesaria)
-    VALUES (%s, %s, %s)
-    """
-    datos = (receta.id_producto, receta.id_insumo, receta.cantidad_necesaria)
+    
+    # Verificar si existe la columna unidad_medida
+    try:
+        cursor.execute("""
+            SELECT COUNT(*) as existe 
+            FROM INFORMATION_SCHEMA.COLUMNS 
+            WHERE TABLE_SCHEMA = DATABASE() 
+            AND TABLE_NAME = 'recetas_insumos' 
+            AND COLUMN_NAME = 'unidad_medida'
+        """)
+        tiene_unidad_medida = cursor.fetchone()[0] > 0
+    except:
+        tiene_unidad_medida = False
+    
+    if tiene_unidad_medida:
+        sql = """
+        INSERT INTO recetas_insumos(id_producto, id_insumo, cantidad_necesaria, unidad_medida)
+        VALUES (%s, %s, %s, %s)
+        """
+        datos = (receta.id_producto, receta.id_insumo, receta.cantidad_necesaria, receta.unidad_medida)
+    else:
+        sql = """
+        INSERT INTO recetas_insumos(id_producto, id_insumo, cantidad_necesaria)
+        VALUES (%s, %s, %s)
+        """
+        datos = (receta.id_producto, receta.id_insumo, receta.cantidad_necesaria)
     
     try:
         cursor.execute(sql, datos)
@@ -32,13 +53,43 @@ def ver_recetas_por_producto(id_producto: int):
         return {"error": "Error de conexión a la base de datos"}
     
     cursor = conexion.cursor(dictionary=True)
-    sql = """
-    SELECT r.*, i.nombre as insumo_nombre, i.unidad_medida, p.nombre as producto_nombre
-    FROM recetas_insumos r
-    JOIN insumos i ON r.id_insumo = i.id_insumo
-    JOIN productos p ON r.id_producto = p.id_producto
-    WHERE r.id_producto = %s
-    """
+    
+    # Verificar si existe la columna unidad_medida en recetas
+    try:
+        cursor.execute("""
+            SELECT COUNT(*) as existe 
+            FROM INFORMATION_SCHEMA.COLUMNS 
+            WHERE TABLE_SCHEMA = DATABASE() 
+            AND TABLE_NAME = 'recetas_insumos' 
+            AND COLUMN_NAME = 'unidad_medida'
+        """)
+        tiene_unidad_medida = cursor.fetchone()[0] > 0
+    except:
+        tiene_unidad_medida = False
+    
+    if tiene_unidad_medida:
+        # ⚠️ IMPORTANTE: Usar alias para unidad_medida de receta para evitar conflicto con insumo
+        # La unidad_medida de la receta debe tener prioridad sobre la del insumo
+        sql = """
+        SELECT r.id_receta, r.id_producto, r.id_insumo, r.cantidad_necesaria, 
+               r.unidad_medida,
+               i.nombre as insumo_nombre, 
+               i.unidad_medida as unidad_medida_insumo,
+               p.nombre as producto_nombre
+        FROM recetas_insumos r
+        JOIN insumos i ON r.id_insumo = i.id_insumo
+        JOIN productos p ON r.id_producto = p.id_producto
+        WHERE r.id_producto = %s
+        """
+    else:
+        sql = """
+        SELECT r.*, i.nombre as insumo_nombre, i.unidad_medida as unidad_medida_insumo, p.nombre as producto_nombre
+        FROM recetas_insumos r
+        JOIN insumos i ON r.id_insumo = i.id_insumo
+        JOIN productos p ON r.id_producto = p.id_producto
+        WHERE r.id_producto = %s
+        """
+    
     cursor.execute(sql, (id_producto,))
     recetas = cursor.fetchall()
     cursor.close()

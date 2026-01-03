@@ -89,6 +89,7 @@ class RecetaInsumoBase(BaseModel):
     id_producto: int
     id_insumo: int
     cantidad_necesaria: Decimal
+    unidad_medida: str  # gramos, kg, litros, mililitros, onzas, piezas, unidades, etc.
 
 class RecetaInsumoCreate(RecetaInsumoBase):
     pass

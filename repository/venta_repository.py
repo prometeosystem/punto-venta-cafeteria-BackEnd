@@ -96,6 +96,55 @@ def crear_venta(venta: VentaCreate):
             )
             cursor.execute(sql_detalle_pedido, datos_detalle_pedido)
         
+        # Crear comanda automáticamente en estado "pendiente" para que pase a barista
+        # Verificar si hay productos con recetas (insumos)
+        productos_con_recetas = []
+        for detalle in venta.detalles:
+            cursor.execute("""
+                SELECT COUNT(*) as tiene_recetas 
+                FROM recetas_insumos 
+                WHERE id_producto = %s
+            """, (detalle.id_producto,))
+            resultado = cursor.fetchone()
+            if resultado and resultado[0] > 0:
+                productos_con_recetas.append(detalle)
+        
+        # Si hay productos con recetas, crear comanda en estado "pendiente"
+        # Los insumos se restarán cuando la comanda se marque como "terminada"
+        comanda_id = None
+        if productos_con_recetas:
+            # ⚠️ IMPORTANTE: Verificar si ya existe una comanda para esta venta
+            # Usar cursor dictionary para acceso por nombre
+            cursor_dict = conexion.cursor(dictionary=True)
+            cursor_dict.execute("SELECT id_comanda FROM comandas WHERE id_venta = %s", (venta_id,))
+            comanda_existente = cursor_dict.fetchone()
+            cursor_dict.close()
+            
+            if comanda_existente:
+                # Ya existe una comanda para esta venta, no crear otra
+                comanda_id = comanda_existente['id_comanda']
+                print(f"[DEBUG] Comanda ya existe para venta {venta_id}: ID {comanda_id}")
+            else:
+                # Crear la comanda en estado "pendiente"
+                sql_comanda = """
+                INSERT INTO comandas(id_venta, estado, fecha_creacion)
+                VALUES (%s, %s, %s)
+                """
+                fecha_actual = datetime.now()
+                cursor.execute(sql_comanda, (venta_id, 'pendiente', fecha_actual))
+                comanda_id = cursor.lastrowid
+                
+                # Crear los detalles de la comanda
+                sql_detalle_comanda = """
+                INSERT INTO detalles_comanda(id_comanda, id_producto, cantidad, observaciones)
+                VALUES (%s, %s, %s, %s)
+                """
+                for detalle in productos_con_recetas:
+                    observaciones = detalle.observaciones if hasattr(detalle, 'observaciones') and detalle.observaciones else None
+                    cursor.execute(sql_detalle_comanda, (
+                        comanda_id, detalle.id_producto, detalle.cantidad, observaciones
+                    ))
+        
         conexion.commit()
         cursor.close()
         conexion.close()
@@ -103,7 +152,9 @@ def crear_venta(venta: VentaCreate):
             "message": "Venta creada correctamente",
             "id_venta": venta_id,
             "id_pedido": pedido_id,
-            "ticket_id": ticket_id
+            "ticket_id": ticket_id,
+            "id_comanda": comanda_id,
+            "comanda_creada": comanda_id is not None
         }
     except Exception as e:
         conexion.rollback()
