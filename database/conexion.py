@@ -5,7 +5,7 @@ def conectar():
         conexion = mysql.connector.connect(
             host="localhost",
             user="root",
-            password="1234567890",
+            password="",  # Sin contraseña por defecto - cambiar si es necesario
             database="sistema_control_inteligente"
         )
         print("---------------Conexión exitosa-----------------")

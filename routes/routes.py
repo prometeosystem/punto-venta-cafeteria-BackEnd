@@ -8,6 +8,7 @@ from controllers.venta_controller import router as venta_router
 from controllers.comanda_controller import router as comanda_router
 from controllers.receta_controller import router as receta_router
 from controllers.preorden_controller import router as preorden_router
+from controllers.reporte_controller import router as reporte_router
 
 api_router = APIRouter()
 
@@ -37,3 +38,6 @@ api_router.include_router(receta_router, prefix="/api/recetas", tags=["Recetas"]
 
 # Rutas de pre-órdenes (pedidos públicos)
 api_router.include_router(preorden_router, prefix="/api/preordenes", tags=["Pre-órdenes"])
+
+# Rutas de reportes
+api_router.include_router(reporte_router, prefix="/api/reportes", tags=["Reportes"])
