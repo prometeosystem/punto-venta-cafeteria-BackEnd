@@ -17,8 +17,47 @@ def crear_usuario(usuario: UsuarioCreate):
         conexion.close()
         return {"error": "El correo ya está registrado"}
     
-    # Hash de la contraseña
-    contrasena_hash = get_password_hash(usuario.contrasena)
+    # La contraseña ya debería estar validada por el schema, pero verificamos por seguridad
+    contrasena = usuario.contrasena
+    
+    # Logging para debug
+    print(f"[DEBUG] Tipo de contrasena en repositorio: {type(contrasena).__name__}")
+    print(f"[DEBUG] Longitud de contrasena: {len(contrasena) if isinstance(contrasena, str) else 'N/A'}")
+    print(f"[DEBUG] Valor de contrasena (primeros 20 chars): {str(contrasena)[:20] if contrasena else 'None'}")
+    print(f"[DEBUG] Bytes de contrasena: {len(contrasena.encode('utf-8')) if isinstance(contrasena, str) else 'N/A'}")
+    
+    # Verificación final: debe ser string de 6-15 caracteres
+    if not isinstance(contrasena, str):
+        cursor.close()
+        conexion.close()
+        return {"error": f"Error: La contraseña debe ser un string. Tipo recibido: {type(contrasena).__name__}"}
+    
+    if len(contrasena) < 6:
+        cursor.close()
+        conexion.close()
+        return {"error": f"Error: La contraseña debe tener al menos 6 caracteres. Recibido: {len(contrasena)} caracteres."}
+    
+    if len(contrasena) > 15:
+        cursor.close()
+        conexion.close()
+        return {"error": f"Error: La contraseña no puede tener más de 15 caracteres. Recibido: {len(contrasena)} caracteres."}
+    
+    # Hash de la contraseña (ahora sabemos que es un string válido de 6-15 caracteres)
+    try:
+        print(f"[DEBUG] Llamando a get_password_hash con: '{contrasena}' (len={len(contrasena)}, bytes={len(contrasena.encode('utf-8'))})")
+        contrasena_hash = get_password_hash(contrasena)
+        print(f"[DEBUG] Hash generado exitosamente: {contrasena_hash[:50]}...")
+    except Exception as e:
+        print(f"[DEBUG] Error en get_password_hash: {type(e).__name__}: {str(e)}")
+        cursor.close()
+        conexion.close()
+        return {"error": f"Error al procesar la contraseña: {str(e)}"}
+    
+    # Manejar apellido_materno None o vacío
+    apellido_materno = usuario.apellido_materno if usuario.apellido_materno and usuario.apellido_materno.strip() else None
+    
+    # Manejar celular None o vacío
+    celular = usuario.celular if usuario.celular and usuario.celular.strip() else None
     
     sql = """
     INSERT INTO usuarios(
@@ -28,8 +67,8 @@ def crear_usuario(usuario: UsuarioCreate):
     VALUES (%s, %s, %s, %s, %s, %s, %s, %s)
     """
     datos = (
-        usuario.nombre, usuario.apellido_paterno, usuario.apellido_materno,
-        usuario.correo, contrasena_hash, usuario.celular, usuario.rol.value, usuario.activo
+        usuario.nombre, usuario.apellido_paterno, apellido_materno,
+        usuario.correo, contrasena_hash, celular, usuario.rol.value, usuario.activo
     )
     
     try:
@@ -51,7 +90,20 @@ def ver_todos_usuarios():
         return {"error": "Error de conexión a la base de datos"}
     
     cursor = conexion.cursor(dictionary=True)
-    sql = "SELECT id_usuario, nombre, apellido_paterno, apellido_materno, correo, celular, rol, activo FROM usuarios"
+    sql = """
+    SELECT 
+        id_usuario, 
+        nombre, 
+        apellido_paterno, 
+        apellido_materno,
+        CONCAT(nombre, ' ', apellido_paterno, IFNULL(CONCAT(' ', apellido_materno), '')) as nombre_completo,
+        correo, 
+        celular, 
+        rol, 
+        activo 
+    FROM usuarios
+    ORDER BY nombre, apellido_paterno
+    """
     cursor.execute(sql)
     filas = cursor.fetchall()
     cursor.close()
@@ -64,7 +116,20 @@ def ver_usuario_by_id(id_usuario: int):
         return {"error": "Error de conexión a la base de datos"}
     
     cursor = conexion.cursor(dictionary=True)
-    sql = "SELECT id_usuario, nombre, apellido_paterno, apellido_materno, correo, celular, rol, activo FROM usuarios WHERE id_usuario = %s"
+    sql = """
+    SELECT 
+        id_usuario, 
+        nombre, 
+        apellido_paterno, 
+        apellido_materno,
+        CONCAT(nombre, ' ', apellido_paterno, IFNULL(CONCAT(' ', apellido_materno), '')) as nombre_completo,
+        correo, 
+        celular, 
+        rol, 
+        activo 
+    FROM usuarios 
+    WHERE id_usuario = %s
+    """
     cursor.execute(sql, (id_usuario,))
     usuario = cursor.fetchone()
     cursor.close()
@@ -154,4 +219,44 @@ def eliminar_usuario(id_usuario: int):
         cursor.close()
         conexion.close()
         return {"error": f"Error al desactivar usuario: {str(e)}"}
+
+def obtener_estadisticas_empleados():
+    """Obtiene estadísticas de empleados: total activos y por rol"""
+    conexion = conectar()
+    if not conexion:
+        return {"error": "Error de conexión a la base de datos"}
+    
+    cursor = conexion.cursor(dictionary=True)
+    
+    # Total de empleados activos
+    sql_total = "SELECT COUNT(*) as total FROM usuarios WHERE activo = 1"
+    cursor.execute(sql_total)
+    total_activos = cursor.fetchone()["total"]
+    
+    # Empleados por rol (solo activos)
+    sql_por_rol = """
+    SELECT 
+        rol,
+        COUNT(*) as cantidad
+    FROM usuarios 
+    WHERE activo = 1
+    GROUP BY rol
+    """
+    cursor.execute(sql_por_rol)
+    por_rol = cursor.fetchall()
+    
+    # Convertir a diccionario más fácil de usar
+    estadisticas_por_rol = {}
+    for item in por_rol:
+        estadisticas_por_rol[item["rol"]] = item["cantidad"]
+    
+    cursor.close()
+    conexion.close()
+    
+    return {
+        "total_empleados": total_activos,
+        "vendedores": estadisticas_por_rol.get("vendedor", 0),
+        "cocina": estadisticas_por_rol.get("cocina", 0),
+        "administradores": estadisticas_por_rol.get("administrador", 0) + estadisticas_por_rol.get("superadministrador", 0)
+    }
 

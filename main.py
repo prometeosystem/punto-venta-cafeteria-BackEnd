@@ -1,5 +1,7 @@
-from fastapi import FastAPI
+from fastapi import FastAPI, Request
 from fastapi.middleware.cors import CORSMiddleware
+from fastapi.exceptions import RequestValidationError
+from fastapi.responses import JSONResponse
 from routes.routes import api_router
 from database.init_db import init_database
 
@@ -99,11 +101,42 @@ app = FastAPI(
 # Configuración CORS (para permitir peticiones desde el frontend)
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"],  # En producción, especificar dominios permitidos
+    allow_origins=[
+        "http://localhost:5174",
+        "http://localhost:5173",
+        "http://localhost:3000",
+        "http://localhost:5175",
+        "http://127.0.0.1:5174",
+        "http://127.0.0.1:5173",
+        "http://127.0.0.1:3000",
+        "http://127.0.0.1:5175",
+    ],  # En producción, especificar solo los dominios permitidos
     allow_credentials=True,
-    allow_methods=["*"],
+    allow_methods=["GET", "POST", "PUT", "DELETE", "OPTIONS", "PATCH"],
     allow_headers=["*"],
+    expose_headers=["*"],
 )
+
+# Manejo de errores de validación
+@app.exception_handler(RequestValidationError)
+async def validation_exception_handler(request: Request, exc: RequestValidationError):
+    """Maneja errores de validación y los devuelve en formato más legible"""
+    errors = []
+    for error in exc.errors():
+        field = ".".join(str(loc) for loc in error["loc"])
+        errors.append({
+            "campo": field,
+            "mensaje": error["msg"],
+            "tipo": error["type"]
+        })
+    return JSONResponse(
+        status_code=422,
+        content={
+            "error": "Error de validación",
+            "detail": errors,
+            "mensaje": f"Los siguientes campos tienen errores: {', '.join([e['campo'] for e in errors])}"
+        }
+    )
 
 # Incluir todas las rutas
 app.include_router(api_router)

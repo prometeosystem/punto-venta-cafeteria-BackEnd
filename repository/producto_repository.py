@@ -22,6 +22,7 @@ def crear_producto(producto: ProductoCreate, imagen_bytes: bytes = None, tipo_im
         tiene_imagen_col = False
     
     if imagen_bytes and tiene_imagen_col:
+        print(f"[DEBUG REPOSITORY] Guardando producto con imagen: {len(imagen_bytes)} bytes, tipo: {tipo_imagen}")
         sql = """
         INSERT INTO productos(nombre, descripcion, precio, categoria, imagen, tipo_imagen, activo)
         VALUES (%s, %s, %s, %s, %s, %s, %s)
@@ -31,6 +32,13 @@ def crear_producto(producto: ProductoCreate, imagen_bytes: bytes = None, tipo_im
             producto.categoria, imagen_bytes, tipo_imagen, producto.activo
         )
     else:
+        # Sin imagen o columna no existe
+        if imagen_bytes:
+            print(f"[DEBUG REPOSITORY] ⚠️ Imagen recibida pero columna no existe. Ejecute la migración.")
+        else:
+            print(f"[DEBUG REPOSITORY] Producto sin imagen")
+        
+        # Crear producto sin imagen
         sql = """
         INSERT INTO productos(nombre, descripcion, precio, categoria, activo)
         VALUES (%s, %s, %s, %s, %s)
@@ -224,13 +232,20 @@ def editar_producto(id_producto: int, producto: ProductoUpdate, imagen_bytes: by
     # Manejar imagen solo si la columna existe
     if tiene_imagen_col:
         if eliminar_imagen:
+            print(f"[DEBUG REPOSITORY] Eliminando imagen del producto {id_producto}")
             campos.append("imagen = NULL")
             campos.append("tipo_imagen = NULL")
         elif imagen_bytes and tipo_imagen:
+            print(f"[DEBUG REPOSITORY] Actualizando imagen del producto {id_producto}: {len(imagen_bytes)} bytes, tipo: {tipo_imagen}")
             campos.append("imagen = %s")
             campos.append("tipo_imagen = %s")
             valores.append(imagen_bytes)
             valores.append(tipo_imagen)
+        else:
+            print(f"[DEBUG REPOSITORY] No se actualizará la imagen del producto {id_producto}")
+    else:
+        if imagen_bytes or eliminar_imagen:
+            print(f"[DEBUG REPOSITORY] ⚠️ Intento de modificar imagen pero columna no existe. Ejecute la migración.")
     
     if not campos:
         cursor.close()

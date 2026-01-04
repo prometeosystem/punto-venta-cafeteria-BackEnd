@@ -1,6 +1,6 @@
 from repository.usuario_repository import (
     crear_usuario, ver_todos_usuarios, ver_usuario_by_id,
-    editar_usuario, eliminar_usuario
+    editar_usuario, eliminar_usuario, obtener_estadisticas_empleados
 )
 from schemas.usuario_schema import UsuarioCreate, UsuarioUpdate
 
@@ -18,4 +18,7 @@ def editar_usuario_service(id_usuario: int, usuario: UsuarioUpdate):
 
 def eliminar_usuario_service(id_usuario: int):
     return eliminar_usuario(id_usuario)
+
+def obtener_estadisticas_empleados_service():
+    return obtener_estadisticas_empleados()
 

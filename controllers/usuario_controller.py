@@ -5,7 +5,8 @@ from services.usuario_service import (
     ver_todos_usuarios_service,
     ver_usuario_by_id_service,
     editar_usuario_service,
-    eliminar_usuario_service
+    eliminar_usuario_service,
+    obtener_estadisticas_empleados_service
 )
 from utils.auth import require_role, get_current_user
 
@@ -17,7 +18,21 @@ async def crear_usuario(
     current_user: dict = Depends(require_role(["administrador", "superadministrador"]))
 ):
     """Crear un nuevo usuario (solo administradores)"""
-    return crear_usuario_service(usuario)
+    try:
+        resultado = crear_usuario_service(usuario)
+        if "error" in resultado:
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail=resultado["error"]
+            )
+        return resultado
+    except HTTPException:
+        raise
+    except Exception as e:
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail=f"Error interno del servidor: {str(e)}"
+        )
 
 @router.get("/ver_usuarios")
 async def listar_usuarios(
@@ -25,6 +40,13 @@ async def listar_usuarios(
 ):
     """Listar todos los usuarios (solo administradores)"""
     return ver_todos_usuarios_service()
+
+@router.get("/estadisticas")
+async def obtener_estadisticas(
+    current_user: dict = Depends(require_role(["administrador", "superadministrador"]))
+):
+    """Obtener estadísticas de empleados: total activos y por rol"""
+    return obtener_estadisticas_empleados_service()
 
 @router.get("/ver_usuario/{id_usuario}")
 async def ver_usuario_by_id(

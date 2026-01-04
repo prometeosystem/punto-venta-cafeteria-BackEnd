@@ -169,6 +169,29 @@ def apply_migrations(cursor):
         except Exception as e:
             print(f"  ⚠️  Error al agregar campo 'extra_leche': {e}")
     
+    # Migración 6: Agregar campos de imagen a productos
+    if not column_exists(cursor, 'productos', 'imagen'):
+        try:
+            cursor.execute("""
+                ALTER TABLE productos 
+                ADD COLUMN imagen LONGBLOB NULL AFTER categoria
+            """)
+            print("  ✓ Agregado campo 'imagen' a tabla productos")
+            migrations_applied += 1
+        except Exception as e:
+            print(f"  ⚠️  Error al agregar campo 'imagen': {e}")
+    
+    if not column_exists(cursor, 'productos', 'tipo_imagen'):
+        try:
+            cursor.execute("""
+                ALTER TABLE productos 
+                ADD COLUMN tipo_imagen VARCHAR(50) NULL AFTER imagen
+            """)
+            print("  ✓ Agregado campo 'tipo_imagen' a tabla productos")
+            migrations_applied += 1
+        except Exception as e:
+            print(f"  ⚠️  Error al agregar campo 'tipo_imagen': {e}")
+    
     return migrations_applied
 
 def execute_sql_statements(cursor, sql_script: str):

@@ -56,7 +56,7 @@ async def crear_producto(
         recetas=recetas_list
     )
     
-    return crear_producto_service(producto_data, imagen)
+    return await crear_producto_service(producto_data, imagen)
 
 @router.get("/ver_productos", summary="Listar productos (PÚBLICO)")
 async def listar_productos():
@@ -156,7 +156,7 @@ async def editar_producto(
     
     producto_update = ProductoUpdate(**update_data)
     
-    return editar_producto_service(id_producto, producto_update, imagen, eliminar_imagen)
+    return await editar_producto_service(id_producto, producto_update, imagen, eliminar_imagen)
 
 @router.delete("/eliminar_producto/{id_producto}")
 async def eliminar_producto(

@@ -99,23 +99,50 @@ def _procesar_recetas(id_producto: int, recetas):
         "errores": errores
     }
 
-def crear_producto_service(producto: ProductoCreate, imagen: Optional[UploadFile] = None):
+async def crear_producto_service(producto: ProductoCreate, imagen: Optional[UploadFile] = None):
     # Procesar imagen si existe
     imagen_bytes = None
     tipo_imagen = None
     
     if imagen:
+        print(f"[DEBUG IMAGEN] Imagen recibida: filename={imagen.filename}, content_type={imagen.content_type}")
+        
         # Validar tipo de archivo
         contenido_tipo = imagen.content_type
+        if not contenido_tipo:
+            # Si no viene content_type, intentar detectarlo por extensión
+            if imagen.filename:
+                ext = imagen.filename.lower().split('.')[-1]
+                if ext in ['jpg', 'jpeg']:
+                    contenido_tipo = 'image/jpeg'
+                elif ext == 'png':
+                    contenido_tipo = 'image/png'
+                elif ext == 'webp':
+                    contenido_tipo = 'image/webp'
+                else:
+                    return {"error": f"Formato de imagen no reconocido. Extensión: {ext}. Use: JPEG, PNG o WebP"}
+            else:
+                return {"error": "No se pudo determinar el tipo de imagen"}
+        
+        print(f"[DEBUG IMAGEN] Tipo de contenido detectado: {contenido_tipo}")
+        
         if contenido_tipo not in ['image/jpeg', 'image/jpg', 'image/png', 'image/webp']:
-            return {"error": "Formato de imagen no permitido. Use: JPEG, PNG o WebP"}
+            return {"error": f"Formato de imagen no permitido: {contenido_tipo}. Use: JPEG, PNG o WebP"}
         
         # Leer bytes de la imagen
         try:
-            imagen_bytes = imagen.file.read()
+            # Leer el archivo (FastAPI UploadFile es async)
+            imagen_bytes = await imagen.read()
+            
+            print(f"[DEBUG IMAGEN] Imagen leída: {len(imagen_bytes)} bytes")
+            
+            # Validar que se leyó algo
+            if not imagen_bytes or len(imagen_bytes) == 0:
+                return {"error": "La imagen está vacía o no se pudo leer"}
+            
             # Validar tamaño (max 5MB)
             if len(imagen_bytes) > 5 * 1024 * 1024:
-                return {"error": "La imagen es demasiado grande. Máximo 5MB"}
+                return {"error": f"La imagen es demasiado grande: {len(imagen_bytes)} bytes. Máximo 5MB"}
             
             # Determinar tipo de imagen
             if contenido_tipo in ['image/jpeg', 'image/jpg']:
@@ -124,8 +151,15 @@ def crear_producto_service(producto: ProductoCreate, imagen: Optional[UploadFile
                 tipo_imagen = 'image/png'
             elif contenido_tipo == 'image/webp':
                 tipo_imagen = 'image/webp'
+            
+            print(f"[DEBUG IMAGEN] Tipo de imagen final: {tipo_imagen}, Tamaño: {len(imagen_bytes)} bytes")
         except Exception as e:
+            import traceback
+            print(f"[DEBUG IMAGEN] ❌ Error al leer la imagen: {str(e)}")
+            print(f"[DEBUG IMAGEN] Traceback: {traceback.format_exc()}")
             return {"error": f"Error al leer la imagen: {str(e)}"}
+    else:
+        print("[DEBUG IMAGEN] No se recibió imagen")
     
     # Crear el producto (sin recetas)
     producto_sin_recetas = ProductoCreate(
@@ -184,23 +218,52 @@ def ver_producto_by_id_service(id_producto: int):
     
     return producto
 
-def editar_producto_service(id_producto: int, producto: ProductoUpdate, imagen: Optional[UploadFile] = None, eliminar_imagen: bool = False):
+async def editar_producto_service(id_producto: int, producto: ProductoUpdate, imagen: Optional[UploadFile] = None, eliminar_imagen: bool = False):
     # Procesar imagen si existe
     imagen_bytes = None
     tipo_imagen = None
     
-    if imagen:
+    if eliminar_imagen:
+        print(f"[DEBUG IMAGEN] Eliminando imagen del producto {id_producto}")
+    elif imagen:
+        print(f"[DEBUG IMAGEN] Actualizando imagen del producto {id_producto}: filename={imagen.filename}, content_type={imagen.content_type}")
+        
         # Validar tipo de archivo
         contenido_tipo = imagen.content_type
+        if not contenido_tipo:
+            # Si no viene content_type, intentar detectarlo por extensión
+            if imagen.filename:
+                ext = imagen.filename.lower().split('.')[-1]
+                if ext in ['jpg', 'jpeg']:
+                    contenido_tipo = 'image/jpeg'
+                elif ext == 'png':
+                    contenido_tipo = 'image/png'
+                elif ext == 'webp':
+                    contenido_tipo = 'image/webp'
+                else:
+                    return {"error": f"Formato de imagen no reconocido. Extensión: {ext}. Use: JPEG, PNG o WebP"}
+            else:
+                return {"error": "No se pudo determinar el tipo de imagen"}
+        
+        print(f"[DEBUG IMAGEN] Tipo de contenido detectado: {contenido_tipo}")
+        
         if contenido_tipo not in ['image/jpeg', 'image/jpg', 'image/png', 'image/webp']:
-            return {"error": "Formato de imagen no permitido. Use: JPEG, PNG o WebP"}
+            return {"error": f"Formato de imagen no permitido: {contenido_tipo}. Use: JPEG, PNG o WebP"}
         
         # Leer bytes de la imagen
         try:
-            imagen_bytes = imagen.file.read()
+            # Leer el archivo (FastAPI UploadFile es async)
+            imagen_bytes = await imagen.read()
+            
+            print(f"[DEBUG IMAGEN] Imagen leída: {len(imagen_bytes)} bytes")
+            
+            # Validar que se leyó algo
+            if not imagen_bytes or len(imagen_bytes) == 0:
+                return {"error": "La imagen está vacía o no se pudo leer"}
+            
             # Validar tamaño (max 5MB)
             if len(imagen_bytes) > 5 * 1024 * 1024:
-                return {"error": "La imagen es demasiado grande. Máximo 5MB"}
+                return {"error": f"La imagen es demasiado grande: {len(imagen_bytes)} bytes. Máximo 5MB"}
             
             # Determinar tipo de imagen
             if contenido_tipo in ['image/jpeg', 'image/jpg']:
@@ -209,8 +272,15 @@ def editar_producto_service(id_producto: int, producto: ProductoUpdate, imagen: 
                 tipo_imagen = 'image/png'
             elif contenido_tipo == 'image/webp':
                 tipo_imagen = 'image/webp'
+            
+            print(f"[DEBUG IMAGEN] Tipo de imagen final: {tipo_imagen}, Tamaño: {len(imagen_bytes)} bytes")
         except Exception as e:
+            import traceback
+            print(f"[DEBUG IMAGEN] ❌ Error al leer la imagen: {str(e)}")
+            print(f"[DEBUG IMAGEN] Traceback: {traceback.format_exc()}")
             return {"error": f"Error al leer la imagen: {str(e)}"}
+    else:
+        print(f"[DEBUG IMAGEN] No se recibió imagen para el producto {id_producto}")
     
     # Si se proporcionan recetas, primero eliminar las existentes y luego crear las nuevas
     if producto.recetas is not None:
